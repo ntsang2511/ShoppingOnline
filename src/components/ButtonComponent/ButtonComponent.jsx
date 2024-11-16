@@ -2,8 +2,10 @@ import { Button } from 'antd'
 function ButtonComponent({ size, styleButton, styleTextButton, textButton, ...rest }) {
   return (
     <Button
+      style={{
+        ...styleButton
+      }}
       size={size}
-      style={styleButton}
       // icon={<SearchOutlined color={colorButton} />}
       {...rest}
     >

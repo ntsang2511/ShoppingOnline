@@ -6,8 +6,20 @@ import slide4 from '../../assets/image/slide4.jpg'
 import slide5 from '../../assets/image/slide5.jpg'
 import CardComponent from '../../components/CardComponent/CardComponent'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
+import { useQuery } from '@tanstack/react-query'
+import * as ProductService from '../../services/ProductService'
 function HomePage() {
   const mockData = ['TV', 'Tủ lạnh', 'Lap top']
+  const fetchProductAll = async () => {
+    const res = await ProductService.getAllProduct()
+    return res
+  }
+  const { isLoading, data } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProductAll,
+    retry: 3
+  })
+
   return (
     <>
       <div style={{ padding: '0 120px' }}>
@@ -19,13 +31,26 @@ function HomePage() {
         <div id="container" style={{ backgroundColor: '#efefef' }}>
           <SliderComponent arrImages={[slide3, slide4, slide5]} />
           <div style={{ marginTop: '60px', display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-            <CardComponent />
-            <CardComponent />
-            <CardComponent />
-            <CardComponent />
-            <CardComponent />
-            <CardComponent />
-            <CardComponent />
+            {isLoading ? (
+              <p>Loading</p>
+            ) : (
+              data?.data?.map((product) => {
+                return (
+                  <CardComponent
+                    key={product._id}
+                    countInStock={product.countInStock}
+                    description={product.description}
+                    name={product.name}
+                    image={product.image}
+                    price={product.price}
+                    rating={product.rating}
+                    type={product.type}
+                    sell={product.selled}
+                    discount={product.discount}
+                  />
+                )
+              })
+            )}
           </div>
           <WrapperProducts>
             <ButtonComponent
