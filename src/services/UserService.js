@@ -53,3 +53,11 @@ export const deleteUser = async (id, access_token) => {
   })
   return res.data
 }
+export const deleteManyUser = async (ids, access_token) => {
+  const res = await axiosJWT.post(`${import.meta.env.VITE_API_URL_BACKEND}/user/delete-many`, ids, {
+    headers: {
+      token: `Bearer ${access_token}`
+    }
+  })
+  return res.data
+}

@@ -7,7 +7,8 @@ function ButtonSearch({
   textButton,
   backgroundColorInput = 'fff',
   bakcgroundColorButton = 'rgb(13,92,182)',
-  colorButton = '#fff'
+  colorButton = '#fff',
+  ...props
 }) {
   return (
     <div style={{ display: 'flex' }}>
@@ -15,6 +16,7 @@ function ButtonSearch({
         size={size}
         placeholder={placeholder}
         style={{ backgroundColor: backgroundColorInput, borderRadius: 0 }}
+        {...props}
       />
       <ButtonComponent
         size={size}

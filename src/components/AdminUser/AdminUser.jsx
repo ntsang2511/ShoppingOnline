@@ -40,9 +40,7 @@ function AdminUser() {
   const [form] = Form.useForm()
 
   const mutationUpdate = useMutationHook((data) => {
-    console.log(data)
     const { id, token, ...rests } = data
-    console.log(rests.data)
     const res = UserService.updateUser(id, rests.data, token)
     return res
   })
@@ -51,7 +49,11 @@ function AdminUser() {
     const res = UserService.deleteUser(id, token)
     return res
   })
-
+  const mutationDeleteMany = useMutationHook((data) => {
+    const { token, ...ids } = data
+    const res = UserService.deleteManyUser(ids, token)
+    return res
+  })
   const getAllUser = async () => {
     const res = await UserService.getAllUser()
     return res
@@ -68,6 +70,14 @@ function AdminUser() {
     isSuccess: isSuccessDeleted,
     isError: isErrorDeleted
   } = mutationDelete
+
+  const {
+    data: deletedManyData,
+    isPending: isLoadingDeleteMany,
+    isSuccess: isSuccessDeletedMany,
+    isError: isErrorDeletedMany
+  } = mutationDeleteMany
+
   const queryUser = useQuery({
     queryKey: ['user'],
     queryFn: getAllUser
@@ -93,12 +103,12 @@ function AdminUser() {
     form.setFieldsValue(stateUserDetails)
   }, [form, stateUserDetails])
   useEffect(() => {
-    if (rowSelected) {
+    if (rowSelected && isOpenDrawer) {
       setIsPendingUpdate(true)
 
       fetchGetUserDetails(rowSelected)
     }
-  }, [rowSelected])
+  }, [rowSelected, isOpenDrawer])
 
   const handleDetailsUser = () => {
     setIsOpenDrawer(true)
@@ -114,6 +124,16 @@ function AdminUser() {
   const handleDeleteUser = () => {
     mutationDelete.mutate(
       { id: rowSelected, token: user?.access_token },
+      {
+        onSettled: () => {
+          queryUser.refetch()
+        }
+      }
+    )
+  }
+  const handleDeleteManyUsers = (ids) => {
+    mutationDeleteMany.mutate(
+      { id: ids, token: user?.access_token },
       {
         onSettled: () => {
           queryUser.refetch()
@@ -329,6 +349,13 @@ function AdminUser() {
   }, [isSuccessUpdated])
 
   useEffect(() => {
+    if (isSuccessDeletedMany && deletedManyData?.status === 'OK') {
+      success()
+    } else if (isErrorDeletedMany) {
+      error()
+    }
+  }, [isSuccessDeletedMany])
+  useEffect(() => {
     if (isSuccessDeleted && deletedData?.status === 'OK') {
       success()
       handleCancelDelete()
@@ -384,7 +411,6 @@ function AdminUser() {
   }
 
   const onUpdateUser = () => {
-    console.log(stateUserDetails)
     mutationUpdate.mutate(
       { id: rowSelected, token: user?.access_token, data: { ...stateUserDetails } },
       {
@@ -403,6 +429,7 @@ function AdminUser() {
 
       <div style={{ marginTop: '20px' }}>
         <TableComponent
+          handleDeleteMany={handleDeleteManyUsers}
           columns={columns}
           data={dataTable}
           isLoading={isLoading}
@@ -497,7 +524,7 @@ function AdminUser() {
               rules={[
                 {
                   required: true,
-                  message: 'Please input your avatar!'
+                  message: 'Please choose your avatar!'
                 }
               ]}
             >

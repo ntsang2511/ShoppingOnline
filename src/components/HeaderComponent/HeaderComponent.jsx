@@ -15,6 +15,7 @@ import * as UserService from '../../services/UserService'
 import { resetUser } from '../../redux/slices/userSlice'
 import { useEffect, useState } from 'react'
 import Loading from '../LoadingComponent/Loading'
+import { searchProduct } from '../../redux/slices/productSlice'
 function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
   const navigate = useNavigate()
   const user = useSelector((state) => state.user)
@@ -22,6 +23,9 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
   const [userName, setUserName] = useState('')
   const [userAvatar, setUserAvatar] = useState('')
   const [loading, setLoading] = useState(false)
+  const [search, setSearch] = useState('')
+  const order = useSelector((state) => state.order)
+
   const handleNavigateLogin = () => {
     navigate('/sign-in')
   }
@@ -47,6 +51,11 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
   const handleNavigateAdmin = () => {
     navigate('/system/admin')
   }
+  const onSearch = (e) => {
+    setSearch(e.target.value)
+    dispatch(searchProduct(e.target.value))
+  }
+
   return (
     <div>
       <WrapperHeader style={{ justifyContent: isHiddenSearch && isHiddenCart ? 'space-between' : 'unset' }}>
@@ -55,7 +64,13 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
         </Col>
         {!isHiddenSearch && (
           <Col span={13}>
-            <ButtonSearch backgroundColorInput="#fff" size="large" placeholder="Search here..." textButton="Tìm kiếm" />
+            <ButtonSearch
+              backgroundColorInput="#fff"
+              size="large"
+              placeholder="Search here..."
+              textButton="Tìm kiếm"
+              onChange={onSearch}
+            />
           </Col>
         )}
         <Col span={6} style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
@@ -114,8 +129,8 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
 
           {!isHiddenCart && (
             <div>
-              <div>
-                <Badge count={4} size="small">
+              <div onClick={() => navigate('/order')} style={{ cursor: 'pointer' }}>
+                <Badge count={order?.orderItems?.length} size="small">
                   <ShoppingCartOutlined style={{ fontSize: '30px', color: '#fff' }} />
                 </Badge>
                 <WrapperTextHeaderSmall>Giỏ hàng</WrapperTextHeaderSmall>

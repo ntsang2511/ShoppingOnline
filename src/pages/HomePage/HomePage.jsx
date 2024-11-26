@@ -8,30 +8,54 @@ import CardComponent from '../../components/CardComponent/CardComponent'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
 import { useQuery } from '@tanstack/react-query'
 import * as ProductService from '../../services/ProductService'
+import { useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import Loading from '../../components/LoadingComponent/Loading'
+import { useDebounce } from '../../hooks/useDebounce'
 function HomePage() {
-  const mockData = ['TV', 'Tủ lạnh', 'Lap top']
-  const fetchProductAll = async () => {
-    const res = await ProductService.getAllProduct()
+  const searchProduct = useSelector((state) => state.product?.search)
+  const searchDebounce = useDebounce(searchProduct, 500)
+  const [limit, setLimit] = useState(5)
+  // const [page, setPage] = useState(5)
+  const [loading, setLoading] = useState(false)
+  const [typeProduct, setTypeProduct] = useState([])
+  const fetchProductAll = async (context) => {
+    const limit = context?.queryKey && context?.queryKey[1]
+    const search = context?.queryKey && context?.queryKey[2]
+    const res = await ProductService.getAllProduct(search, limit)
     return res
   }
-  const { isLoading, data } = useQuery({
-    queryKey: ['products'],
+
+  const { isPending, data, isFetching } = useQuery({
+    queryKey: ['products', limit, searchDebounce],
     queryFn: fetchProductAll,
+    keepPreviousData: true,
     retry: 3
   })
 
+  const fetchAllTypeProduct = async () => {
+    const res = await ProductService.getAllTypeProduct()
+    if (res?.status === 'OK') {
+      setTypeProduct(res?.data)
+    }
+  }
+
+  useEffect(() => {
+    fetchAllTypeProduct()
+  }, [])
+
   return (
-    <>
+    <Loading isLoading={isPending || loading}>
       <div style={{ padding: '0 120px' }}>
         <WrapperTypeProduct>
-          {mockData.map((item, index) => {
+          {typeProduct?.map((item, index) => {
             return <TypeProduct name={item} key={index} />
           })}
         </WrapperTypeProduct>
         <div id="container" style={{ backgroundColor: '#efefef' }}>
           <SliderComponent arrImages={[slide3, slide4, slide5]} />
           <div style={{ marginTop: '60px', display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-            {isLoading ? (
+            {isPending ? (
               <p>Loading</p>
             ) : (
               data?.data?.map((product) => {
@@ -47,6 +71,7 @@ function HomePage() {
                     type={product.type}
                     sell={product.selled}
                     discount={product.discount}
+                    id={product._id}
                   />
                 )
               })
@@ -54,21 +79,26 @@ function HomePage() {
           </div>
           <WrapperProducts>
             <ButtonComponent
-              textButton="Xem thêm"
+              textButton={isFetching ? 'Tải thêm' : 'Xem thêm'}
               type="outlined"
               styleButton={{
                 border: '1px solid rgb(11,116,229)',
-                color: 'rgb(11,116,229)',
+                color: `${data?.total === data?.data?.length ? '#ccc' : 'rgb(11,116,229)'}`,
+                cursor: `${data?.total === data?.data?.length ? 'not-allowed' : 'pointer'}`,
                 width: '240px',
                 height: '38px',
                 borderRadius: '4px'
+              }}
+              disabled={data?.total === data?.data?.length || data?.totalPage === 1}
+              onClick={() => {
+                setLimit((prev) => prev + 6)
               }}
               styleTextButton={{ fontWeight: 500 }}
             />
           </WrapperProducts>
         </div>
       </div>
-    </>
+    </Loading>
   )
 }
 

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import {
   StyleNameProduct,
   WrapperCardStyle,
@@ -7,7 +8,12 @@ import {
   WrapperStyleTextSell
 } from './style'
 import { StarFilled } from '@ant-design/icons'
-function CardComponent({ countInStock, description, name, image, price, rating, type, selled, discount }) {
+import { convertPrice } from '../../utils'
+function CardComponent({ countInStock, description, name, image, price, rating, type, selled, discount, id }) {
+  const navigate = useNavigate()
+  const handleDetailsProduct = (id) => {
+    navigate(`/product-details/${id}`)
+  }
   return (
     <WrapperCardStyle
       hoverable
@@ -21,12 +27,8 @@ function CardComponent({ countInStock, description, name, image, price, rating, 
           padding: '10px'
         }
       }}
-      cover={
-        <img
-          alt="example"
-          src="https://images.pexels.com/photos/364822/rolex-watch-time-luxury-364822.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-        />
-      }
+      cover={<img alt="example" src={image} />}
+      onClick={() => handleDetailsProduct(id)}
     >
       <StyleNameProduct>{name}</StyleNameProduct>
       <WrapperReportText>
@@ -37,7 +39,7 @@ function CardComponent({ countInStock, description, name, image, price, rating, 
         <WrapperStyleTextSell>| Đã bán {selled || 1000}+</WrapperStyleTextSell>
       </WrapperReportText>
       <WrapperPriceText>
-        {price}đ <WrapperPriceDiscountText>-{discount || 5}%</WrapperPriceDiscountText>
+        {convertPrice(price)} <WrapperPriceDiscountText>-{discount || 5}%</WrapperPriceDiscountText>
       </WrapperPriceText>
     </WrapperCardStyle>
   )

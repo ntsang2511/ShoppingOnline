@@ -1,4 +1,4 @@
-import { Button, Form, Space } from 'antd'
+import { Button, Form, Space, Select } from 'antd'
 import { WrapperHeader, WrapperUploadFile } from './style'
 import { AppstoreAddOutlined, DeleteOutlined, EditOutlined, SearchOutlined, UploadOutlined } from '@ant-design/icons'
 import TableComponent from '../TableComponent/TableComponent'
@@ -14,6 +14,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import DrawerComponent from '../DrawerComponent/DrawerComponent'
 import { useSelector } from 'react-redux'
 import ModalComponent from '../ModalComponent/ModalComponent'
+import { renderOptions } from '../../utils.js'
 function AdminProduct() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -25,13 +26,16 @@ function AdminProduct() {
     rating: '',
     image: '',
     type: '',
-    countInStock: ''
+    countInStock: '',
+    newType: '',
+    discount: ''
   })
   const [stateProductDetails, setStateProductDetails] = useState({
     name: '',
     price: '',
     description: '',
     rating: '',
+    discount: '',
     image: '',
     type: '',
     countInStock: ''
@@ -39,7 +43,7 @@ function AdminProduct() {
   const [searchText, setSearchText] = useState('')
   // const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
-
+  const [typeSelect, setTypeSelect] = useState('')
   const user = useSelector((state) => state?.user)
   const [isPendingUpdate, setIsPendingUpdate] = useState(false)
   const [rowSelected, setRowSelected] = useState('')
@@ -55,7 +59,8 @@ function AdminProduct() {
       rating: '',
       image: '',
       type: '',
-      countInStock: ''
+      countInStock: '',
+      discount: ''
     })
     form.resetFields()
   }
@@ -74,7 +79,8 @@ function AdminProduct() {
       stateProduct.countInStock === '' ||
       stateProduct.description === '' ||
       stateProduct.type === '' ||
-      stateProduct.rating === ''
+      stateProduct.rating === '' ||
+      stateProduct.discount === ''
     ) {
       error('Vui lòng nhập đủ thông tin trước khi lưu')
     } else {
@@ -85,11 +91,10 @@ function AdminProduct() {
   }
 
   const mutation = useMutationHook((data) => {
-    const { name, price, description, rating, image, type, countInStock } = data
-    const res = ProductService.createProduct({ name, price, description, rating, image, type, countInStock })
+    const { name, price, description, rating, image, type, countInStock, discount } = data
+    const res = ProductService.createProduct({ name, price, description, rating, image, type, countInStock, discount })
     return res
   })
-  console.log('rowSelected: ', rowSelected)
 
   const mutationUpdate = useMutationHook((data) => {
     const { id, token, ...rests } = data
@@ -101,11 +106,27 @@ function AdminProduct() {
     const res = ProductService.deleteProduct(id, token)
     return res
   })
-
+  const mutationDeleteMany = useMutationHook((data) => {
+    const { token, ...ids } = data
+    const res = ProductService.deleteManyProduct(ids, token)
+    return res
+  })
   const getAllProduct = async () => {
-    const res = await ProductService.getAllProduct()
+    const res = await ProductService.getAllProduct({ search: '', limit: 100 })
     return res
   }
+
+  const handleDeleteManyProducts = (ids) => {
+    mutationDeleteMany.mutate(
+      { id: ids, token: user?.access_token },
+      {
+        onSettled: () => {
+          queryProduct.refetch()
+        }
+      }
+    )
+  }
+
   const { data, isPending, isSuccess, isError } = mutation
   const {
     data: updatedData,
@@ -119,10 +140,28 @@ function AdminProduct() {
     isSuccess: isSuccessDeleted,
     isError: isErrorDeleted
   } = mutationDelete
+
+  const {
+    data: deletedManyData,
+    isPending: isLoadingDeleteMany,
+    isSuccess: isSuccessDeletedMany,
+    isError: isErrorDeletedMany
+  } = mutationDeleteMany
+
+  const fetchAllTypeProduct = async () => {
+    const res = await ProductService.getAllTypeProduct()
+    return res
+  }
+
   const queryProduct = useQuery({
     queryKey: ['products'],
     queryFn: getAllProduct
   })
+  const typeProduct = useQuery({
+    queryKey: ['type-product'],
+    queryFn: fetchAllTypeProduct
+  })
+
   const { isPending: isLoading, data: products } = queryProduct
   const fetchGetProductDetails = async (rowSelected) => {
     const res = await ProductService.getDetailsProduct(rowSelected)
@@ -134,7 +173,8 @@ function AdminProduct() {
         rating: res?.data?.rating,
         image: res?.data?.image,
         type: res?.data?.type,
-        countInStock: res?.data?.countInStock
+        countInStock: res?.data?.countInStock,
+        discount: res?.data?.discount
       })
     }
     setIsPendingUpdate(false)
@@ -145,12 +185,12 @@ function AdminProduct() {
     form.setFieldsValue(stateProductDetails)
   }, [form, stateProductDetails])
   useEffect(() => {
-    if (rowSelected) {
+    if (rowSelected && isOpenDrawer) {
       setIsPendingUpdate(true)
 
       fetchGetProductDetails(rowSelected)
     }
-  }, [rowSelected])
+  }, [rowSelected, isOpenDrawer])
 
   const handleDetailsProduct = () => {
     setIsOpenDrawer(true)
@@ -379,6 +419,13 @@ function AdminProduct() {
   }, [isSuccessUpdated])
 
   useEffect(() => {
+    if (isSuccessDeletedMany && deletedManyData?.status === 'OK') {
+      success()
+    } else if (isErrorDeletedMany) {
+      error()
+    }
+  }, [isSuccessDeletedMany])
+  useEffect(() => {
     if (isSuccessDeleted && deletedData?.status === 'OK') {
       success()
       handleCancelDelete()
@@ -387,7 +434,17 @@ function AdminProduct() {
     }
   }, [isSuccessDeleted])
   const onFinish = () => {
-    mutation.mutate(stateProduct, {
+    const params = {
+      name: stateProduct.name,
+      price: stateProduct.price,
+      description: stateProduct.description,
+      rating: stateProduct.rating,
+      image: stateProduct.image,
+      type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
+      countInStock: stateProduct.countInStock,
+      discount: stateProduct.discount
+    }
+    mutation.mutate(params, {
       // onSettled: () => {
       //   queryProduct.refetch()
       // }
@@ -408,10 +465,16 @@ function AdminProduct() {
   }
 
   const handleOnChange = (e) => {
-    setStateProduct({
-      ...stateProduct,
+    // setStateProduct({
+    //   ...stateProduct,
+    //   [e.target.name]: e.target.value
+    // })
+    form.setFieldsValue({ [e.target.name]: e.target.value }) // Cập nhật giá trị trong form
+    setStateProduct((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value
-    })
+    }))
+    console.log(stateProduct)
   }
   const handleOnChangeDetails = (e) => {
     setStateProductDetails({
@@ -469,7 +532,6 @@ function AdminProduct() {
   }
 
   const onUpdateProduct = () => {
-    console.log(stateProductDetails)
     mutationUpdate.mutate(
       { id: rowSelected, token: user?.access_token, data: stateProductDetails },
       {
@@ -478,6 +540,13 @@ function AdminProduct() {
         }
       }
     )
+  }
+  const handleChangeSelect = (value) => {
+    setStateProduct({
+      ...stateProduct,
+      type: value
+    })
+    console.log(stateProduct)
   }
 
   return (
@@ -494,6 +563,7 @@ function AdminProduct() {
       </div>
       <div style={{ marginTop: '20px' }}>
         <TableComponent
+          handleDeleteMany={handleDeleteManyProducts}
           columns={columns}
           data={dataTable}
           isLoading={isLoading}
@@ -511,7 +581,7 @@ function AdminProduct() {
           <Form
             name="basic"
             labelCol={{
-              span: 2
+              span: 6
             }}
             wrapperCol={{
               span: 22
@@ -547,8 +617,30 @@ function AdminProduct() {
                 }
               ]}
             >
-              <InputComponent name="type" value={stateProduct.type} onChange={handleOnChange} />
+              <Select
+                name={typeSelect !== 'add_type' ? 'type' : ''}
+                // defaultValue="lucy"
+                value={stateProduct.type}
+                style={{ border: '2px solid #000', borderRadius: '6px' }}
+                onChange={handleChangeSelect}
+                options={renderOptions(typeProduct?.data?.data)}
+              />
             </Form.Item>
+
+            {stateProduct.type === 'add_type' && (
+              <Form.Item
+                label="New Type"
+                name="newType"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input product type!'
+                  }
+                ]}
+              >
+                <InputComponent value={stateProduct.newType} onChange={handleOnChange} name="newType" />
+              </Form.Item>
+            )}
 
             <Form.Item
               label="Count in stock"
@@ -598,6 +690,18 @@ function AdminProduct() {
               ]}
             >
               <InputComponent name="rating" value={stateProduct.rating} onChange={handleOnChange} />
+            </Form.Item>
+            <Form.Item
+              label="Discount"
+              name="discount"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input product discount!'
+                }
+              ]}
+            >
+              <InputComponent name="discount" value={stateProduct.discount} onChange={handleOnChange} />
             </Form.Item>
             <Form.Item
               label="Image"
@@ -742,12 +846,25 @@ function AdminProduct() {
               <InputComponent name="rating" value={stateProductDetails.rating} onChange={handleOnChangeDetails} />
             </Form.Item>
             <Form.Item
+              label="Discount"
+              name="discount"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input product discount!'
+                }
+              ]}
+            >
+              <InputComponent name="discount" value={stateProductDetails.discount} onChange={handleOnChangeDetails} />
+            </Form.Item>
+
+            <Form.Item
               label="Image"
               name="image"
               rules={[
                 {
                   required: true,
-                  message: 'Please input product image!'
+                  message: 'Please choose product image!'
                 }
               ]}
             >

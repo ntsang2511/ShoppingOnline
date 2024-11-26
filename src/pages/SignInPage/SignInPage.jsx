@@ -5,7 +5,7 @@ import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from '.
 import slide2 from '../../assets/image/slide2.jpg'
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import * as UserService from '../../services/UserService'
 import { useMutationHook } from '../../hooks/useMutationHook'
 import Loading from '../../components/LoadingComponent/Loading'
@@ -16,6 +16,7 @@ import { updateUser } from '../../redux/slices/userSlice'
 
 function SignInPage() {
   const [isShowPassword, setIsShowPassword] = useState(false)
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const dispatch = useDispatch()
@@ -24,9 +25,14 @@ function SignInPage() {
   const { data, isPending, isSuccess } = mutation
 
   useEffect(() => {
+    console.log(location)
     if (isSuccess) {
+      if (location?.state) {
+        navigate(location?.state)
+      } else {
+        navigate('/')
+      }
       message.success('Sign in successfully')
-      navigate('/')
       localStorage.setItem('access_token', JSON.stringify(data?.access_token))
       if (data?.access_token) {
         const decoded = jwtDecode(data?.access_token)

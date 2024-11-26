@@ -1,11 +1,29 @@
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import ProductDetailComponent from '../../components/ProductDetailComponent/ProductDetailComponent'
+import { useEffect } from 'react'
 
 function ProductDetailsPage() {
+  const { id } = useParams()
+  const { pathname } = useLocation()
+  console.log(pathname)
+  const navigate = useNavigate()
+  const navigateHome = () => {
+    navigate('/')
+  }
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
   return (
     <div style={{ padding: '0 120px', backgroundColor: '#efefef', height: '1000px' }}>
-      <h5>Trang chủ</h5>
+      <h3>
+        <span onClick={navigateHome} style={{ cursor: 'pointer', fontWeight: 700 }}>
+          Trang chủ
+        </span>{' '}
+        - Chi tiết sản phẩm
+      </h3>
       <div>
-        <ProductDetailComponent />
+        <ProductDetailComponent idProduct={id} />
       </div>
     </div>
   )
