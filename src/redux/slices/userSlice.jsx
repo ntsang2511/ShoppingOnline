@@ -8,7 +8,8 @@ const initialState = {
   avatar: '',
   access_token: '',
   id: '',
-  isAdmin: false
+  isAdmin: false,
+  city: ''
 }
 
 export const userSlice = createSlice({
@@ -24,6 +25,7 @@ export const userSlice = createSlice({
         phone = '',
         avatar = '',
         _id = '',
+        city = '',
         isAdmin = false
       } = action.payload
       state.name = name
@@ -34,6 +36,7 @@ export const userSlice = createSlice({
       state.id = _id
       state.access_token = access_token
       state.isAdmin = isAdmin
+      state.city = city
     },
     resetUser: (state, action) => {
       state.name = ''
@@ -42,6 +45,7 @@ export const userSlice = createSlice({
       state.address = ''
       state.avatar = ''
       state.access_token = ''
+      state.city = ''
       state.isAdmin = false
     }
   }
