@@ -1,49 +1,28 @@
-import { Button, Form, Radio, Space } from 'antd'
+import { Button, Space } from 'antd'
 import { WrapperHeader } from './style'
-import { DeleteOutlined, EditOutlined, SearchOutlined, UploadOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 import TableComponent from '../TableComponent/TableComponent'
 import ModalComponent from '../ModalComponent/ModalComponent'
 import Loading from '../LoadingComponent/Loading'
 import InputComponent from '../InputComponent/InputComponent'
-import { WrapperUploadFile } from './style'
-import DrawerComponent from '../DrawerComponent/DrawerComponent'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { error, success } from '../Message/Message'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useSelector } from 'react-redux'
 import { useMutationHook } from '../../hooks/useMutationHook'
-import Compressor from 'compressorjs'
-import { getBase64 } from '../../utils'
 import * as UserService from '../../services/UserService'
-import { debounce } from 'lodash'
+import { useNavigate } from 'react-router-dom'
 
 function AdminUser() {
-  const queryClient = useQueryClient()
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
-  const [stateUserDetails, setStateUserDetails] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    isAdmin: false,
-    avatar: '',
-    address: ''
-  })
+  const navigate = useNavigate()
   const [searchText, setSearchText] = useState('')
   // const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
 
   const user = useSelector((state) => state?.user)
-  const [isPendingUpdate, setIsPendingUpdate] = useState(false)
   const [rowSelected, setRowSelected] = useState('')
-  const [isOpenDrawer, setIsOpenDrawer] = useState(false)
 
-  const [form] = Form.useForm()
-
-  const mutationUpdate = useMutationHook((data) => {
-    const { id, token, ...rests } = data
-    const res = UserService.updateUser(id, rests.data, token)
-    return res
-  })
   const mutationDelete = useMutationHook((data) => {
     const { id, token } = data
     const res = UserService.deleteUser(id, token)
@@ -58,12 +37,6 @@ function AdminUser() {
     const res = await UserService.getAllUser()
     return res
   }
-  const {
-    data: updatedData,
-    isPending: isLoadingUpdate,
-    isSuccess: isSuccessUpdated,
-    isError: isErrorUpdated
-  } = mutationUpdate
   const {
     data: deletedData,
     isPending: isLoadingDelete,
@@ -83,36 +56,6 @@ function AdminUser() {
     queryFn: getAllUser
   })
   const { isPending: isLoading, data: users } = queryUser
-  const fetchGetUserDetails = async (rowSelected) => {
-    const res = await UserService.getDetailsUser(rowSelected)
-    if (res?.data) {
-      setStateUserDetails({
-        name: res?.data?.name,
-        email: res?.data?.email,
-        phone: res?.data?.phone,
-        isAdmin: res?.data?.isAdmin,
-        avatar: res?.data?.avatar,
-        address: res?.data?.address
-      })
-    }
-    setIsPendingUpdate(false)
-    // return res
-  }
-
-  useEffect(() => {
-    form.setFieldsValue(stateUserDetails)
-  }, [form, stateUserDetails])
-  useEffect(() => {
-    if (rowSelected && isOpenDrawer) {
-      setIsPendingUpdate(true)
-
-      fetchGetUserDetails(rowSelected)
-    }
-  }, [rowSelected, isOpenDrawer])
-
-  const handleDetailsUser = () => {
-    setIsOpenDrawer(true)
-  }
 
   const handleDelete = () => {
     setIsModalOpenDelete(true)
@@ -141,11 +84,17 @@ function AdminUser() {
       }
     )
   }
-  const renderAction = () => {
+  const renderAction = (record) => {
     return (
       <div>
         <DeleteOutlined style={{ color: 'red', fontSize: '30px', cursor: 'pointer' }} onClick={handleDelete} />
-        <EditOutlined style={{ color: 'orange', fontSize: '30px', cursor: 'pointer' }} onClick={handleDetailsUser} />
+        <EditOutlined
+          style={{ color: 'orange', fontSize: '30px', cursor: 'pointer' }}
+          onClick={() => {
+            console.log(record._id)
+            navigate(`/users/edit/${record._id}`)
+          }}
+        />
       </div>
     )
   }
@@ -323,7 +272,7 @@ function AdminUser() {
     {
       title: 'Action',
       dataIndex: 'action',
-      render: renderAction
+      render: (_, record) => renderAction(record)
     }
   ]
   const formatDate = (isoDate) => {
@@ -338,15 +287,6 @@ function AdminUser() {
       key: user._id
     }
   })
-
-  useEffect(() => {
-    if (isSuccessUpdated && updatedData?.status === 'OK') {
-      success()
-      handleOnCloseDrawer()
-    } else if (isErrorUpdated) {
-      error()
-    }
-  }, [isSuccessUpdated])
 
   useEffect(() => {
     if (isSuccessDeletedMany && deletedManyData?.status === 'OK') {
@@ -364,65 +304,13 @@ function AdminUser() {
     }
   }, [isSuccessDeleted])
 
-  const handleOnChangeDetails = useCallback(
-    debounce((e) => {
-      setStateUserDetails((prevState) => ({
-        ...prevState,
-        [e.target.name]: e.target.value
-      }))
-    }, 500),
-    [] // Delay 500ms
-  )
   // (e) => {
   //   setStateUserDetails({
   //     ...stateUserDetails,
   //     [e.target.name]: e.target.value
   //   })
   // }
-  const handleOnChangeAvatarDetails = async ({ fileList }) => {
-    const file = fileList[0]
 
-    new Compressor(file.originFileObj, {
-      quality: 0.6, // Điều chỉnh chất lượng ảnh, giá trị từ 0-1
-      success: async (compressedFile) => {
-        const preview = await getBase64(compressedFile)
-        setStateUserDetails({
-          ...stateUserDetails,
-          avatar: preview
-        })
-      },
-      error(err) {
-        console.error(err.message)
-      }
-    })
-  }
-
-  const handleOnCloseDrawer = () => {
-    setIsOpenDrawer(false)
-    setStateUserDetails({
-      name: '',
-      email: '',
-      phone: '',
-      isAdmin: false,
-      avatar: '',
-      address: ''
-    })
-    form.resetFields()
-  }
-
-  const onUpdateUser = () => {
-    mutationUpdate.mutate(
-      { id: rowSelected, token: user?.access_token, data: { ...stateUserDetails } },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries(['users']) // Làm mới dữ liệu bảng sản phẩm
-        }
-      }
-    )
-  }
-  const onFinishFailedDetail = () => {
-    error()
-  }
   return (
     <div>
       <WrapperHeader>Quản lý người dùng</WrapperHeader>
@@ -442,122 +330,6 @@ function AdminUser() {
           }}
         />
       </div>
-
-      <DrawerComponent title="Chi tiết người dùng" isOpen={isOpenDrawer} onClose={handleOnCloseDrawer} width="90%">
-        <Loading isLoading={isPendingUpdate || isLoadingUpdate}>
-          <Form
-            name="basic"
-            labelCol={{
-              span: 8
-            }}
-            wrapperCol={{
-              span: 18
-            }}
-            style={{
-              maxWidth: 600
-            }}
-            onFinish={onUpdateUser}
-            onFinishFailed={onFinishFailedDetail}
-            autoComplete="off"
-            form={form}
-          >
-            <Form.Item
-              label="Name"
-              name="name"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your name!'
-                }
-              ]}
-            >
-              <InputComponent name="name" value={stateUserDetails.name} onChange={handleOnChangeDetails} />
-            </Form.Item>
-
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your email!'
-                }
-              ]}
-            >
-              <InputComponent name="email" value={stateUserDetails.email} onChange={handleOnChangeDetails} />
-            </Form.Item>
-
-            <Form.Item
-              label="Phone"
-              name="phone"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your phone!'
-                }
-              ]}
-            >
-              <InputComponent name="phone" value={stateUserDetails.phone} onChange={handleOnChangeDetails} />
-            </Form.Item>
-
-            <Form.Item label="Role" name="isAdmin">
-              <Radio.Group name="isAdmin" onChange={handleOnChangeDetails} value={stateUserDetails.isAdmin}>
-                <Radio value={true}>Admin</Radio>
-                <Radio value={false}>User</Radio>
-              </Radio.Group>
-            </Form.Item>
-            <Form.Item
-              label="Address"
-              name="address"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your address!'
-                }
-              ]}
-            >
-              <InputComponent name="address" value={stateUserDetails.address} onChange={handleOnChangeDetails} />
-            </Form.Item>
-            <Form.Item
-              label="Avatar"
-              name="avatar"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please choose your avatar!'
-                }
-              ]}
-            >
-              <WrapperUploadFile onChange={handleOnChangeAvatarDetails} maxCount={1}>
-                <Button icon={<UploadOutlined />}>Select file</Button>
-                {stateUserDetails?.avatar && (
-                  <img
-                    src={stateUserDetails?.avatar}
-                    style={{
-                      height: '60px',
-                      width: '60px',
-                      borderRadius: '50%',
-                      objectFit: 'cover'
-                    }}
-                    alt="avatar"
-                  />
-                )}
-              </WrapperUploadFile>
-            </Form.Item>
-
-            <Form.Item
-              wrapperCol={{
-                offset: 8,
-                span: 16
-              }}
-            >
-              <Button type="primary" htmlType="submit">
-                Apply
-              </Button>
-            </Form.Item>
-          </Form>
-        </Loading>
-      </DrawerComponent>
 
       <ModalComponent
         title="Xóa người dùng"

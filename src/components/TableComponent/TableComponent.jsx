@@ -41,7 +41,9 @@ function TableComponent({
 
     // Chuẩn bị cột: Lọc bỏ các cột không cần xuất (như Action)
     const exportableColumns = columns
-      .filter((col) => col.dataIndex && col.dataIndex !== 'action' && col.dataIndex !== 'image')
+      .filter(
+        (col) => col.dataIndex && col.dataIndex !== 'action' && col.dataIndex !== 'image' && col.dataIndex !== 'avatar'
+      )
       .map((col) => ({
         title: col.title,
         dataIndex: col.dataIndex

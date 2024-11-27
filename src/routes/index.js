@@ -1,4 +1,7 @@
 import AdminPage from '../pages/AdminPage/AdminPage'
+import CreateProductPage from '../pages/AdminPage/CreateProductPage/CreateProductPage'
+import EditProductPage from '../pages/AdminPage/EditProductPage/EditProductPage'
+import EditUserPage from '../pages/AdminPage/EditUserPage/EditUserPage'
 import HomePage from '../pages/HomePage/HomePage'
 import NotFoundPage from '../pages/NotFoundPage/NotFoundPage'
 import OrderPage from '../pages/OrderPage/OrderPage'
@@ -26,6 +29,17 @@ export const routes = [
     isShowHeader: true
   },
   {
+    path: '/products/create-product',
+    page: CreateProductPage,
+    isShowHeader: true
+  },
+
+  {
+    path: 'products/edit/:id',
+    page: EditProductPage,
+    isShowHeader: true
+  },
+  {
     path: '/product/:type',
     page: TypeProductPage,
     isShowHeader: true
@@ -43,6 +57,12 @@ export const routes = [
   {
     path: '/product-details/:id',
     page: ProductDetailsPage,
+    isShowHeader: true
+  },
+
+  {
+    path: '/users/edit/:id',
+    page: EditUserPage,
     isShowHeader: true
   },
   {

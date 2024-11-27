@@ -5,7 +5,6 @@ import { useEffect } from 'react'
 function ProductDetailsPage() {
   const { id } = useParams()
   const { pathname } = useLocation()
-  console.log(pathname)
   const navigate = useNavigate()
   const navigateHome = () => {
     navigate('/')
@@ -16,7 +15,7 @@ function ProductDetailsPage() {
 
   return (
     <div style={{ padding: '0 120px', backgroundColor: '#efefef', height: '1000px' }}>
-      <h3>
+      <h3 style={{ fontSize: '1.5rem' }}>
         <span onClick={navigateHome} style={{ cursor: 'pointer', fontWeight: 700 }}>
           Trang chủ
         </span>{' '}

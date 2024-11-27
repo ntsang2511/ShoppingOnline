@@ -18,18 +18,16 @@ import {
   decreaseAmount,
   increaseAmount,
   removeAllOrderProduct,
-  removeOrderProduct
+  removeOrderProduct,
+  selectedOrder
 } from '../../redux/slices/orderSlice'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { convertPrice } from '../../utils'
 function OrderPage() {
   const order = useSelector((state) => state.order)
   const dispatch = useDispatch()
   const [listChecked, setListChecked] = useState([])
-  let totalPriceWithoutDiscount = 0
-  let totalPriceDiscount = 0
-  const deliveryPrice = [20000, 10000]
-  let totalPrice = 0
+
   const onChange = (e) => {
     if (listChecked.includes(e.target.value)) {
       const newListChecked = listChecked.filter((item) => {
@@ -69,13 +67,36 @@ function OrderPage() {
     }
   }
 
-  const calculateDeliveryPrice = (price, discount) => {
-    if (price - discount > 200000) {
+  useEffect(() => {
+    dispatch(selectedOrder({ listChecked }))
+  }, [listChecked])
+  const priceMemo = useMemo(() => {
+    const result = order?.orderItemsSelected?.reduce((total, current) => {
+      return total + current.price * current.amount
+    }, 0)
+    return result
+  }, [order])
+  const priceDiscountMemo = useMemo(() => {
+    const result = order?.orderItemsSelected?.reduce((total, current) => {
+      return total + current.discount * current.amount
+    }, 0)
+    if (Number(result)) {
+      return result
+    }
+    return 0
+  }, [order])
+  const deliveryPriceMemo = useMemo(() => {
+    if (priceMemo > 200000) {
       return 10000
+    } else if (priceMemo === 0) {
+      return 0
     } else {
       return 20000
     }
-  }
+  }, [order])
+  const totalPriceMemo = useMemo(() => {
+    return priceMemo - priceDiscountMemo * 0.01 * priceMemo + deliveryPriceMemo
+  }, [priceMemo, priceDiscountMemo, deliveryPriceMemo])
 
   return (
     <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
@@ -102,9 +123,6 @@ function OrderPage() {
             <WrapperStyleHeader>
               <WrapperListOrder>
                 {order?.orderItems?.map((ord, index) => {
-                  totalPriceWithoutDiscount += ord?.price * ord?.amount
-                  totalPriceDiscount += ord?.discount * 0.01 * ord?.price
-                  totalPrice = totalPriceWithoutDiscount - totalPriceDiscount
                   return (
                     <WrapperOrderItem key={index}>
                       <div style={{ width: '250px', display: 'flex', alignItems: 'center', flex: 1 }}>
@@ -165,38 +183,25 @@ function OrderPage() {
               <WrapperInfo>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span>Tạm tính</span>
-                  <span style={{ color: '#000', fontSize: '14px', fontWeight: 700 }}>
-                    {convertPrice(totalPriceWithoutDiscount)}
-                  </span>
+                  <span style={{ color: '#000', fontSize: '14px', fontWeight: 700 }}>{convertPrice(priceMemo)}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span>Giảm giá</span>
                   <span style={{ color: '#000', fontSize: '14px', fontWeight: 700 }}>
-                    {convertPrice(totalPriceDiscount)}
+                    {convertPrice(priceDiscountMemo * 0.01 * priceMemo)}
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span>Phí giao hàng</span>
                   <span style={{ color: '#000', fontSize: '14px', fontWeight: 700 }}>
-                    {convertPrice(
-                      totalPriceWithoutDiscount != 0
-                        ? calculateDeliveryPrice(totalPriceWithoutDiscount, totalPriceDiscount)
-                        : 0
-                    )}
+                    {convertPrice(deliveryPriceMemo)}
                   </span>
                 </div>
               </WrapperInfo>
               <WrapperTotal>
                 <span style={{ fontSize: '20px' }}>Tổng tiền</span>
                 <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <span style={{ color: 'rgb(254,56,52)', fontSize: '24px' }}>
-                    {convertPrice(
-                      totalPrice +
-                        (totalPriceWithoutDiscount != 0
-                          ? calculateDeliveryPrice(totalPriceWithoutDiscount, totalPriceDiscount)
-                          : 0)
-                    )}
-                  </span>
+                  <span style={{ color: 'rgb(254,56,52)', fontSize: '24px' }}>{convertPrice(totalPriceMemo)}</span>
                   <span style={{ color: '#000', fontSize: '11px' }}>(Đã bao gồm VAT nếu có)</span>
                 </span>
               </WrapperTotal>

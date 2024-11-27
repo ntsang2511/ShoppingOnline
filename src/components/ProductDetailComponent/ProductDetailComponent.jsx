@@ -58,22 +58,10 @@ function ProductDetailComponent({ idProduct }) {
     }
   }
 
-  console.log(productDetails)
   const handleAddOrderProduct = () => {
     if (!user?.id) {
       navigate('/sign-in', { state: location.pathname })
     } else {
-      // {
-      //   name: { type: String, required: true, unique: true },
-      //   amount: { type: Number, required: true },
-      //   image: { type: String, required: true },
-      //   price: { type: Number, required: true },
-      //   product: {
-      //     type: mongoose.Schema.Types.ObjectId,
-      //     ref: 'Product',
-      //     required: true
-      //   }
-      // }
       dispath(
         addOrderProduct({
           orderItems: {
@@ -89,31 +77,31 @@ function ProductDetailComponent({ idProduct }) {
     }
   }
 
+  const parseDescription = (text) => {
+    // Tách đoạn văn bản dựa trên dấu `##`
+    const lines = text.split('\n').filter((line) => line.trim() !== '')
+    return lines.map((line, index) => {
+      if (line.startsWith('##')) {
+        // Nếu dòng bắt đầu bằng `##`, trả về nội dung in đậm
+        return (
+          <div key={index} style={{ display: 'flex', justifyContent: 'center', fontSize: '2rem' }}>
+            <h3 style={{ display: 'block', marginBottom: '8px' }}>{line.replace('##', '')}</h3>
+          </div>
+        )
+      }
+      // Các dòng khác sẽ là nội dung bình thường
+      return (
+        <p key={index} style={{ marginBottom: '8px', fontSize: '1.5rem' }}>
+          {line}
+        </p>
+      )
+    })
+  }
   return (
-    <Loading isLoading={isPending}>
+    <Loading isLoading={isPending || isFetching}>
       <Row style={{ padding: '16px', backgroundColor: '#fff' }}>
         <Col span={10} style={{ paddingRight: '10px' }}>
-          <Image src={productDetails?.image} alt="Image product" preview={false} />
-          <Row style={{ paddingTop: '10px' }}>
-            <Col span={4}>
-              <Image src={productDetails?.image} alt="Image small" preview={true} />
-            </Col>
-            <Col span={4}>
-              <Image src={productDetails?.image} alt="Image small" preview={true} />
-            </Col>
-            <Col span={4}>
-              <Image src={productDetails?.image} alt="Image small" preview={true} />
-            </Col>
-            <Col span={4}>
-              <Image src={productDetails?.image} alt="Image small" preview={true} />
-            </Col>
-            <Col span={4}>
-              <Image src={productDetails?.image} alt="Image small" preview={true} />
-            </Col>
-            <Col span={4}>
-              <Image src={productDetails?.image} alt="Image small" preview={true} />
-            </Col>
-          </Row>
+          <Image src={productDetails?.image} alt="Image product" preview={true} />
         </Col>
         <Col span={14}>
           <WrapperStyleNameProduct>{productDetails?.name}</WrapperStyleNameProduct>
@@ -176,6 +164,14 @@ function ProductDetailComponent({ idProduct }) {
           </div>
         </Col>
       </Row>
+      <div style={{ padding: '16px', backgroundColor: '#fff' }}>
+        <div style={{ color: 'red', fontSize: '3rem' }}>Thông tin mô tả</div>
+        {isPending || isFetching ? (
+          <p style={{ fontSize: '2rem', color: '#999' }}>Đang tải thông tin mô tả...</p>
+        ) : (
+          parseDescription(productDetails?.description)
+        )}
+      </div>
     </Loading>
   )
 }
