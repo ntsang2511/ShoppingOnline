@@ -12,17 +12,19 @@ import { useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import Loading from '../../components/LoadingComponent/Loading'
 import { useDebounce } from '../../hooks/useDebounce'
+import { useNavigate } from 'react-router-dom'
 function HomePage() {
   const searchProduct = useSelector((state) => state.product?.search)
   const searchDebounce = useDebounce(searchProduct, 500)
   const [limit, setLimit] = useState(5)
+  const navigate = useNavigate()
   // const [page, setPage] = useState(5)
   const [loading, setLoading] = useState(false)
   const [typeProduct, setTypeProduct] = useState([])
   const fetchProductAll = async (context) => {
     const limit = context?.queryKey && context?.queryKey[1]
     const search = context?.queryKey && context?.queryKey[2]
-    const res = await ProductService.getAllProduct(search, limit)
+    const res = await ProductService.getProductBySearch(search, limit)
     return res
   }
 
@@ -44,37 +46,48 @@ function HomePage() {
     fetchAllTypeProduct()
   }, [])
 
+  const handleNavigateToAllProduct = () => {
+    navigate('/products/get-all')
+  }
+
   return (
     <Loading isLoading={isPending || loading}>
-      <div style={{ padding: '0 120px' }}>
+      <div style={{ padding: '0 120px', backgroundColor: ' #333333' }}>
         <WrapperTypeProduct>
           {typeProduct?.map((item, index) => {
             return <TypeProduct name={item} key={index} />
           })}
         </WrapperTypeProduct>
-        <div id="container" style={{ backgroundColor: '#efefef' }}>
+        <div id="container" style={{ backgroundColor: '#333333' }}>
           <SliderComponent arrImages={[slide3, slide4, slide5]} />
           <div style={{ marginTop: '60px', display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
             {isPending ? (
               <p>Loading</p>
             ) : (
-              data?.data?.map((product) => {
-                return (
-                  <CardComponent
-                    key={product._id}
-                    countInStock={product.countInStock}
-                    description={product.description}
-                    name={product.name}
-                    image={product.image}
-                    price={product.price}
-                    rating={product.rating}
-                    type={product.type}
-                    sell={product.selled}
-                    discount={product.discount}
-                    id={product._id}
-                  />
-                )
-              })
+              data?.data
+                ?.sort((a, b) => {
+                  // Sắp xếp sao cho sản phẩm có countInStock === 0 ở cuối
+                  if (a.countInStock === 0 && b.countInStock !== 0) return 1
+                  if (a.countInStock !== 0 && b.countInStock === 0) return -1
+                  return 0 // Giữ nguyên thứ tự nếu cả hai có countInStock bằng nhau
+                })
+                ?.map((product) => {
+                  return (
+                    <CardComponent
+                      key={product._id}
+                      countInStock={product.countInStock}
+                      description={product.description}
+                      name={product.name}
+                      image={product.image}
+                      price={product.price}
+                      rating={product.rating}
+                      type={product.type}
+                      selled={product.selled}
+                      discount={product.discount}
+                      id={product._id}
+                    />
+                  )
+                })
             )}
           </div>
           <WrapperProducts>
@@ -82,17 +95,18 @@ function HomePage() {
               textButton={isFetching ? 'Tải thêm' : 'Xem thêm'}
               type="outlined"
               styleButton={{
-                border: '1px solid rgb(11,116,229)',
-                color: `${data?.total === data?.data?.length ? '#ccc' : 'rgb(11,116,229)'}`,
+                border: '1px solid #f9f9fd',
+                color: `${data?.total === data?.data?.length ? '#ccc' : '#f9f9fd'}`,
                 cursor: `${data?.total === data?.data?.length ? 'not-allowed' : 'pointer'}`,
                 width: '240px',
                 height: '38px',
                 borderRadius: '4px'
               }}
               disabled={data?.total === data?.data?.length || data?.totalPage === 1}
-              onClick={() => {
-                setLimit((prev) => prev + 6)
-              }}
+              // onClick={() => {
+              //   setLimit((prev) => prev + 6)
+              // }}
+              onClick={() => handleNavigateToAllProduct()}
               styleTextButton={{ fontWeight: 500 }}
             />
           </WrapperProducts>

@@ -6,7 +6,7 @@ export const WrapperStyleImageSmall = styled(Image)`
   width: 100px;
 `
 export const WrapperStyleNameProduct = styled.h1`
-  color: rgb(36, 36, 36);
+  color: #fff;
   font-size: 24px;
   font-weight: 500;
   line-height: 32px;
@@ -16,7 +16,7 @@ export const WrapperStyleNameProduct = styled.h1`
 export const WrapperStyleTextSell = styled.span`
   font-size: 15px;
   line-height: 24px;
-  color: rgb(120, 120, 120);
+  color: #fff;
 `
 export const WrapperPriceProduct = styled.div`
   background: rgb(250, 250, 250);
@@ -26,10 +26,10 @@ export const WrapperPriceProduct = styled.div`
 export const WrapperPriceTextProduct = styled.h1`
   font-size: 32px;
   line-height: 40px;
-  margin-right: 8px;
   font-weight: 500;
   padding: 10px;
-  margin-top: 10px;
+  background-color: #333;
+  color: #e01c1c;
 `
 export const WrapperAddressProduct = styled.div`
   span.address {
@@ -60,11 +60,16 @@ export const WrapperQuantityProduct = styled.div`
 
 export const WrapperInputNumber = styled(InputNumber)`
   &.ant-input-number.ant-input-number-sm {
+    background-color: #333;
+
     width: 40px;
     border-top: none;
     border-bottom: none;
     .ant-input-number-handler-wrap {
       display: none !important;
+    }
+    .ant-input-number-input {
+      color: #fff;
     }
   }
 `

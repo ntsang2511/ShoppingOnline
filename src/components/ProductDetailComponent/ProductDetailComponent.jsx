@@ -21,9 +21,10 @@ import { convertPrice } from '../../utils'
 
 function ProductDetailComponent({ idProduct }) {
   const user = useSelector((state) => state.user)
+  const order = useSelector((state) => state.order)
   const navigate = useNavigate()
   const location = useLocation()
-  const dispath = useDispatch()
+  const dispatch = useDispatch()
 
   const [numProduct, setNumProduct] = useState(1)
   const onChange = (e) => {
@@ -46,11 +47,15 @@ function ProductDetailComponent({ idProduct }) {
     enabled: !!idProduct
   })
 
-  const handleChangeCount = (type) => {
+  const handleChangeCount = (type, countInStock) => {
     if (type === 'increase') {
-      setNumProduct(numProduct + 1)
+      if (numProduct < countInStock) {
+        setNumProduct(numProduct + 1)
+      } else if (numProduct === countInStock) {
+        return
+      }
     } else {
-      if (numProduct === 1) {
+      if (numProduct <= 1) {
         return
       } else {
         setNumProduct(numProduct - 1)
@@ -62,7 +67,7 @@ function ProductDetailComponent({ idProduct }) {
     if (!user?.id) {
       navigate('/sign-in', { state: location.pathname })
     } else {
-      dispath(
+      dispatch(
         addOrderProduct({
           orderItems: {
             name: productDetails?.name,
@@ -70,7 +75,8 @@ function ProductDetailComponent({ idProduct }) {
             image: productDetails?.image,
             price: productDetails?.price,
             product: productDetails?._id,
-            discount: productDetails?.discount
+            discount: productDetails?.discount,
+            countInStock: productDetails?.countInStock
           }
         })
       )
@@ -84,14 +90,14 @@ function ProductDetailComponent({ idProduct }) {
       if (line.startsWith('##')) {
         // Nếu dòng bắt đầu bằng `##`, trả về nội dung in đậm
         return (
-          <div key={index} style={{ display: 'flex', justifyContent: 'center', fontSize: '2rem' }}>
+          <div key={index} style={{ display: 'flex', justifyContent: 'center', fontSize: '2rem', color: '#fff' }}>
             <h3 style={{ display: 'block', marginBottom: '8px' }}>{line.replace('##', '')}</h3>
           </div>
         )
       }
       // Các dòng khác sẽ là nội dung bình thường
       return (
-        <p key={index} style={{ marginBottom: '8px', fontSize: '1.5rem' }}>
+        <p key={index} style={{ marginBottom: '8px', fontSize: '1.5rem', color: '#fff' }}>
           {line}
         </p>
       )
@@ -99,39 +105,46 @@ function ProductDetailComponent({ idProduct }) {
   }
   return (
     <Loading isLoading={isPending || isFetching}>
-      <Row style={{ padding: '16px', backgroundColor: '#fff' }}>
+      <Row style={{ padding: '16px', backgroundColor: '#333' }}>
         <Col span={10} style={{ paddingRight: '10px' }}>
           <Image src={productDetails?.image} alt="Image product" preview={true} />
         </Col>
         <Col span={14}>
           <WrapperStyleNameProduct>{productDetails?.name}</WrapperStyleNameProduct>
           <div>
-            <Rate disabled value={productDetails?.rating} style={{ fontSize: '12px', color: 'rgb(251,216,54' }} />
-            <WrapperStyleTextSell> | Đã bán 1000+</WrapperStyleTextSell>
+            <Rate disabled value={productDetails?.rating} style={{ fontSize: '12px', color: 'rgb(251,216,54)' }} />
+            <WrapperStyleTextSell> | Đã bán {productDetails?.selled || 0}</WrapperStyleTextSell>
+          </div>
+          <div style={{ marginTop: '10px' }}>
+            {productDetails?.countInStock === 0 || numProduct === productDetails?.countInStock ? (
+              <span style={{ color: 'red' }}>Sản phẩm đã hết hàng</span>
+            ) : (
+              <span style={{ color: 'green' }}>Số lượng còn lại: {productDetails?.countInStock}</span>
+            )}
           </div>
           <WrapperPriceProduct>
             <WrapperPriceTextProduct>{convertPrice(productDetails?.price)}</WrapperPriceTextProduct>
           </WrapperPriceProduct>
 
           <WrapperAddressProduct>
-            <span>Giao đến </span>
+            <span style={{ color: '#fff' }}>Giao đến </span>
             <span className="address">{user.address}</span> -<span className="change_address">Đổi địa chỉ</span>
           </WrapperAddressProduct>
           <div style={{ margin: '10px 0 20px' }}>
-            <div style={{ marginBottom: '6px' }}>Số lượng</div>
+            <div style={{ marginBottom: '6px', color: '#fff' }}>Số lượng</div>
             <WrapperQuantityProduct>
               <button
-                onClick={() => handleChangeCount('decrease')}
+                onClick={() => handleChangeCount('decrease', productDetails?.countInStock)}
                 style={{ border: 'none', backgroundColor: 'transparent' }}
               >
-                <MinusOutlined style={{ fontSize: '20px' }} size="14px" />
+                <MinusOutlined style={{ fontSize: '20px', color: '#fff' }} size="14px" />
               </button>
               <WrapperInputNumber onChange={onChange} min={1} value={numProduct} size="small" />
               <button
-                onClick={() => handleChangeCount('increase')}
+                onClick={() => handleChangeCount('increase', productDetails?.countInStock)}
                 style={{ border: 'none', backgroundColor: 'transparent' }}
               >
-                <PlusOutlined style={{ fontSize: '20px' }} size="14px" />
+                <PlusOutlined style={{ fontSize: '20px', color: '#fff' }} size="14px" />
               </button>
             </WrapperQuantityProduct>
           </div>
@@ -147,6 +160,7 @@ function ProductDetailComponent({ idProduct }) {
               }}
               textButton="Chọn mua"
               onClick={handleAddOrderProduct}
+              disabled={productDetails?.countInStock === 0}
               styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: 700 }}
             />
             <ButtonComponent
@@ -164,7 +178,7 @@ function ProductDetailComponent({ idProduct }) {
           </div>
         </Col>
       </Row>
-      <div style={{ padding: '16px', backgroundColor: '#fff' }}>
+      <div style={{ padding: '16px', backgroundColor: '#333' }}>
         <div style={{ color: 'red', fontSize: '3rem' }}>Thông tin mô tả</div>
         {isPending || isFetching ? (
           <p style={{ fontSize: '2rem', color: '#999' }}>Đang tải thông tin mô tả...</p>

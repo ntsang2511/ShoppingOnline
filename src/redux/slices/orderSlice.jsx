@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-
+import { error, success } from '../../components/Message/Message'
 const initialState = {
   orderItems: [],
   orderItemsSelected: [],
@@ -26,8 +26,10 @@ export const orderSlice = createSlice({
         return item?.product === orderItems.product
       })
       if (itemOrder) {
+        success('Đã thêm sản phẩm thành công')
         itemOrder.amount += orderItems.amount
       } else {
+        success('Đã thêm sản phẩm thành công')
         state.orderItems.push(orderItems)
       }
     },
@@ -39,7 +41,11 @@ export const orderSlice = createSlice({
       const itemOrderSelected = state?.orderItemsSelected?.find((item) => {
         return item?.product === idProduct
       })
-      itemOrder.amount++
+      if (itemOrder.amount < itemOrder.countInStock) {
+        itemOrder.amount++
+      } else {
+        error('Đã quá số lượng hàng có trong shop')
+      }
       if (itemOrderSelected) {
         itemOrderSelected.amount++
       }

@@ -25,8 +25,11 @@ function SignInPage() {
   const { data, isPending, isSuccess } = mutation
 
   useEffect(() => {
-    console.log(location)
-    if (isSuccess) {
+    if (data?.status === 'ERR') {
+      message.error(data?.message)
+      return
+    }
+    if (isSuccess && data?.status === 'OK') {
       if (location?.state) {
         navigate(location?.state)
       } else {
@@ -65,9 +68,25 @@ function SignInPage() {
       password
     })
   }
+
   const handleNavigateSignUp = () => {
     navigate('/sign-up')
   }
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('btn-signin').click()
+      }
+    }
+
+    // Gắn sự kiện khi component được mount
+    document.addEventListener('keydown', handleKeyDown)
+
+    // Xóa sự kiện khi component bị hủy
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
   return (
     <div
       style={{
@@ -88,7 +107,6 @@ function SignInPage() {
             handleOnChange={handleOnChangeEmail}
             value={email}
           />
-          {data?.status === 'ERR' && <span style={{ color: 'red' }}>{data?.message}</span>}
           <div style={{ position: 'relative' }}>
             <span style={{ zIndex: 10, position: 'absolute', top: '4px', right: '8px' }}>
               {isShowPassword ? <EyeFilled onClick={onClick} /> : <EyeInvisibleFilled onClick={onClick} />}
@@ -100,10 +118,10 @@ function SignInPage() {
               type={isShowPassword ? 'text' : 'password'}
             />
           </div>
-          {data?.status === 'ERR' && <span style={{ color: 'red' }}>{data?.message}</span>}
+          {data?.status === 'ERR' && <span style={{ color: 'red', fontSize: '1.4rem' }}>{data?.message}</span>}
           <Loading isLoading={isPending}>
             <ButtonComponent
-              disabled={!email || !password}
+              id="btn-signin"
               onClick={handleSignIn}
               size={40}
               styleButton={{

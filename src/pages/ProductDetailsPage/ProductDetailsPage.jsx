@@ -14,8 +14,8 @@ function ProductDetailsPage() {
   }, [pathname])
 
   return (
-    <div style={{ padding: '0 120px', backgroundColor: '#efefef', height: '1000px' }}>
-      <h3 style={{ fontSize: '1.5rem' }}>
+    <div style={{ padding: '0 120px', backgroundColor: '#333', height: '1000px' }}>
+      <h3 style={{ fontSize: '1.5rem', color: '#fff', marginTop: '0', paddingTop: '15px' }}>
         <span onClick={navigateHome} style={{ cursor: 'pointer', fontWeight: 700 }}>
           Trang chủ
         </span>{' '}

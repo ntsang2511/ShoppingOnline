@@ -11,6 +11,7 @@ import {
   WrapperPriceDiscount,
   WrapperRight,
   WrapperStyleHeader,
+  WrapperStyleHeaderDelivery,
   WrapperTotal
 } from './style'
 import { useDispatch, useSelector } from 'react-redux'
@@ -21,7 +22,7 @@ import {
   removeOrderProduct,
   selectedOrder
 } from '../../redux/slices/orderSlice'
-import { error, success } from '../../components/Message/Message'
+import { error } from '../../components/Message/Message'
 import ModalComponent from '../../components/ModalComponent/ModalComponent'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { convertPrice } from '../../utils'
@@ -31,7 +32,10 @@ import * as UserService from '../../services/UserService'
 import { debounce } from 'lodash'
 import { useMutationHook } from '../../hooks/useMutationHook'
 import { updateUser } from '../../redux/slices/userSlice'
+import { useNavigate } from 'react-router-dom'
+import StepComponent from '../../components/StepComponent/StepComponent'
 function OrderPage() {
+  const navigate = useNavigate()
   const [stateUserDetails, setStateUserDetails] = useState({
     name: '',
     phone: '',
@@ -110,6 +114,10 @@ function OrderPage() {
     }
   }, [isOpenModalUpdateInfo])
 
+  const handleChangeAddress = () => {
+    setIsOpenModalUpdateInfo(true)
+  }
+
   useEffect(() => {
     form.setFieldsValue(stateUserDetails)
   }, [form, stateUserDetails])
@@ -122,7 +130,7 @@ function OrderPage() {
   }, [order])
   const priceDiscountMemo = useMemo(() => {
     const result = order?.orderItemsSelected?.reduce((total, current) => {
-      return total + current.discount * current.amount
+      return total + current.discount * 0.01 * current.price * current.amount
     }, 0)
     if (Number(result)) {
       return result
@@ -130,16 +138,16 @@ function OrderPage() {
     return 0
   }, [order])
   const deliveryPriceMemo = useMemo(() => {
-    if (priceMemo > 200000) {
+    if (priceMemo > 200000 && priceMemo < 500000) {
       return 10000
-    } else if (priceMemo === 0) {
+    } else if ((priceMemo === 0 && order?.orderItemsSelected?.length === 0) || priceMemo >= 500000) {
       return 0
     } else {
       return 20000
     }
   }, [order])
   const totalPriceMemo = useMemo(() => {
-    return priceMemo - priceDiscountMemo * 0.01 * priceMemo + deliveryPriceMemo
+    return priceMemo - priceDiscountMemo + deliveryPriceMemo
   }, [priceMemo, priceDiscountMemo, deliveryPriceMemo])
 
   const handleAddCard = () => {
@@ -147,6 +155,8 @@ function OrderPage() {
       error('Vui lòng chọn sản phẩm')
     } else if (!user?.phone || !user?.address || !user?.name || !user?.city) {
       setIsOpenModalUpdateInfo(true)
+    } else {
+      navigate('/payment')
     }
   }
   const mutationUpdate = useMutationHook((data) => {
@@ -185,13 +195,33 @@ function OrderPage() {
     }
   }
 
-  console.log(user)
+  const itemStep = [
+    {
+      title: '20.000 VND',
+      description: 'Dưới 200.000 VND'
+    },
+    {
+      title: '10.000 VND',
+      description: 'Từ 200.000 VND đến dưới 500.000 VND',
+      subTitle: 'Left 00:00:08'
+    },
+    {
+      title: '0 VND',
+      description: 'Từ 500.000 VND trở lên'
+    }
+  ]
   return (
     <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
       <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
         <h2 style={{ padding: '10px' }}>Giỏ hàng</h2>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <WrapperLeft>
+            <WrapperStyleHeaderDelivery>
+              <StepComponent
+                items={itemStep}
+                current={deliveryPriceMemo === 10000 ? 1 : deliveryPriceMemo === 20000 ? 0 : 2}
+              />
+            </WrapperStyleHeaderDelivery>
             <WrapperStyleHeader>
               <span style={{ display: 'inline-block', flex: 1 }}>
                 <Checkbox
@@ -245,14 +275,20 @@ function OrderPage() {
                             onClick={() => handleChangeCount('decrease', ord?.product)}
                             style={{ border: 'none', backgroundColor: 'transparent' }}
                           >
-                            <MinusOutlined style={{ fontSize: '20px' }} size="14px" />
+                            <MinusOutlined style={{ fontSize: '20px' }} size="14px" min={1} max={ord?.countInStock} />
                           </button>
-                          <WrapperInputNumber min={1} defaultValue={ord?.amount} value={ord?.amount} size="small" />
+                          <WrapperInputNumber
+                            min={1}
+                            max={ord?.countInStock}
+                            defaultValue={ord?.amount}
+                            value={ord?.amount}
+                            size="small"
+                          />
                           <button
                             onClick={() => handleChangeCount('increase', ord?.product)}
                             style={{ border: 'none', backgroundColor: 'transparent' }}
                           >
-                            <PlusOutlined style={{ fontSize: '20px' }} size="14px" />
+                            <PlusOutlined style={{ fontSize: '20px' }} size="14px" min={1} max={ord?.countInStock} />
                           </button>
                         </WrapperCountOrder>
                         <span style={{ color: 'rgb(255,66,28)', fontSize: '13px' }}>
@@ -267,6 +303,17 @@ function OrderPage() {
             </WrapperStyleHeader>
           </WrapperLeft>
           <WrapperRight>
+            <WrapperInfo style={{ marginLeft: '40px' }}>
+              <div>
+                <span>Địa chỉ: </span>
+                <span style={{ color: 'blue', fontWeight: 'bold' }}>
+                  {user?.address} {user?.city}
+                </span>
+                <span onClick={handleChangeAddress} style={{ paddingLeft: '5px', color: 'blue', cursor: 'pointer' }}>
+                  Thay đổi
+                </span>
+              </div>
+            </WrapperInfo>
             <div style={{ width: '100%' }}>
               <WrapperInfo>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -276,7 +323,7 @@ function OrderPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span>Giảm giá</span>
                   <span style={{ color: '#000', fontSize: '14px', fontWeight: 700 }}>
-                    {convertPrice(priceDiscountMemo * 0.01 * priceMemo)}
+                    {convertPrice(priceDiscountMemo)}
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

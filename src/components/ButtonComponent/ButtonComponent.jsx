@@ -9,7 +9,7 @@ function ButtonComponent({ size, styleButton, styleTextButton, textButton, ...re
       // icon={<SearchOutlined color={colorButton} />}
       {...rest}
     >
-      <span style={styleTextButton}>{textButton}</span>
+      <span style={{ ...styleTextButton }}>{textButton}</span>
     </Button>
   )
 }

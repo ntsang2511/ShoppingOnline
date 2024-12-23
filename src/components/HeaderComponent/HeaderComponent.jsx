@@ -25,7 +25,7 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const order = useSelector((state) => state.order)
-
+  const [isOpenPopup, setIsOpenPopup] = useState(false)
   const handleNavigateLogin = () => {
     navigate('/sign-in')
   }
@@ -45,17 +45,30 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
     setLoading(false)
   }, [user?.name, user?.avatar])
 
-  const handleNavigateProfileDetails = () => {
-    navigate('/profile-user')
-  }
-  const handleNavigateAdmin = () => {
-    navigate('/system/admin')
-  }
   const onSearch = (e) => {
     setSearch(e.target.value)
-    dispatch(searchProduct(e.target.value))
   }
 
+  const onClickButtonSearch = () => {
+    dispatch(searchProduct(search))
+  }
+  const handleClickNavigate = (type = '') => {
+    if (type === 'profile') {
+      navigate('/profile-user')
+    } else if (type === 'admin') {
+      navigate('/system/admin')
+    } else if (type === 'my-order') {
+      navigate('/my-order', {
+        state: {
+          id: user?.id,
+          token: user?.access_token
+        }
+      })
+    } else {
+      handleLogOut()
+    }
+    setIsOpenPopup(false)
+  }
   return (
     <div>
       <WrapperHeader style={{ justifyContent: isHiddenSearch && isHiddenCart ? 'space-between' : 'unset' }}>
@@ -67,9 +80,24 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
             <ButtonSearch
               backgroundColorInput="#fff"
               size="large"
+              style={{
+                borderTopLeftRadius: '20px',
+                borderBottomLeftRadius: '20px',
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0
+              }}
+              styleForButton={{
+                borderTopRightRadius: '20px',
+                borderBottomRightRadius: '20px',
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                borderLeft: 'none'
+              }}
+              bakcgroundColorButton="#000"
               placeholder="Search here..."
               textButton="Tìm kiếm"
               onChange={onSearch}
+              onClickButton={onClickButtonSearch}
             />
           </Col>
         )}
@@ -102,18 +130,26 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
                   content={
                     <div>
                       {user?.isAdmin && (
-                        <WrapperContentPopUp onClick={handleNavigateAdmin}>Quản lý hệ thống</WrapperContentPopUp>
+                        <WrapperContentPopUp onClick={() => handleClickNavigate('admin')}>
+                          Quản lý hệ thống
+                        </WrapperContentPopUp>
                       )}
-                      <WrapperContentPopUp onClick={handleNavigateProfileDetails}>
+                      <WrapperContentPopUp onClick={() => handleClickNavigate('profile')}>
                         Thông tin người dùng
                       </WrapperContentPopUp>
+                      <WrapperContentPopUp onClick={() => handleClickNavigate(`my-order`)}>
+                        Đơn hàng của tôi
+                      </WrapperContentPopUp>
                       <Divider style={{ margin: '0' }} />
-                      <WrapperContentPopUp onClick={handleLogOut}>Đăng xuất</WrapperContentPopUp>
+                      <WrapperContentPopUp onClick={() => handleClickNavigate()}>Đăng xuất</WrapperContentPopUp>
                     </div>
                   }
                   trigger="click"
+                  open={isOpenPopup}
                 >
-                  <div style={{ cursor: 'pointer' }}>{user.name}</div>
+                  <div style={{ cursor: 'pointer' }} onClick={() => setIsOpenPopup((prev) => !prev)}>
+                    {user.name}
+                  </div>
                 </Popover>
               ) : (
                 <div onClick={handleNavigateLogin} style={{ cursor: 'pointer' }}>
@@ -126,7 +162,14 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
               )}
             </WrapperHeaderAccount>
           </Loading>
-
+          <div
+            style={{
+              width: '1px',
+              height: '30px',
+              backgroundColor: '#fff',
+              margin: '0 10px'
+            }}
+          ></div>
           {!isHiddenCart && (
             <div>
               <div onClick={() => navigate('/order')} style={{ cursor: 'pointer' }}>

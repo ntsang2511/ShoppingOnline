@@ -6,8 +6,10 @@ function ButtonSearch({
   placeholder,
   textButton,
   backgroundColorInput = 'fff',
-  bakcgroundColorButton = 'rgb(13,92,182)',
+  bakcgroundColorButton = '#FDA481',
   colorButton = '#fff',
+  styleForButton,
+  onClickButton,
   ...props
 }) {
   return (
@@ -20,7 +22,12 @@ function ButtonSearch({
       />
       <ButtonComponent
         size={size}
-        styleButton={{ background: bakcgroundColorButton, borderRadius: '0' }}
+        styleButton={{
+          background: bakcgroundColorButton,
+          ...styleForButton
+        }}
+        onClick={onClickButton}
+        styleTextButton={{ color: '#fff' }}
         icon={<SearchOutlined color={colorButton} style={{ color: '#fff' }} />}
         textButton={textButton}
       />

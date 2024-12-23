@@ -16,7 +16,7 @@ function CardComponent({ countInStock, description, name, image, price, rating, 
   }
   return (
     <WrapperCardStyle
-      hoverable
+      hoverable={countInStock > 0}
       style={{ width: '239px' }}
       styles={{
         header: {
@@ -28,15 +28,16 @@ function CardComponent({ countInStock, description, name, image, price, rating, 
         }
       }}
       cover={<img alt="example" src={image} />}
-      onClick={() => handleDetailsProduct(id)}
+      onClick={() => countInStock !== 0 && handleDetailsProduct(id)}
+      disabled={countInStock === 0}
     >
-      <StyleNameProduct>{name}</StyleNameProduct>
-      <WrapperReportText>
+      <StyleNameProduct disabled={countInStock === 0}>{name}</StyleNameProduct>
+      <WrapperReportText disabled={countInStock === 0}>
         <span style={{ marginRight: '4px' }}>
           <span>{rating}</span>
           <StarFilled style={{ fontSize: '12px', color: 'yellow' }} />
         </span>
-        <WrapperStyleTextSell>| Đã bán {selled || 1000}+</WrapperStyleTextSell>
+        <WrapperStyleTextSell disabled={countInStock === 0}>| Đã bán {selled || 1000}+</WrapperStyleTextSell>
       </WrapperReportText>
       <WrapperPriceText>
         {convertPrice(price)} <WrapperPriceDiscountText>-{discount || 5}%</WrapperPriceDiscountText>

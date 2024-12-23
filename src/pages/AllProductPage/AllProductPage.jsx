@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import Loading from '../../components/LoadingComponent/Loading'
 import { useSelector } from 'react-redux'
 import { useDebounce } from '../../hooks/useDebounce'
-function TypeProductPage() {
+function AllProductPage() {
   const searchProduct = useSelector((state) => state.product?.search)
   const searchDebounce = useDebounce(searchProduct, 500)
   const { state } = useLocation()
@@ -16,12 +16,12 @@ function TypeProductPage() {
   const [loading, setLoading] = useState(false)
   const [paginate, setPaginate] = useState({
     page: 0,
-    limit: 10,
+    limit: 12,
     total: 1
   })
-  const fetchProductType = async (type, page, limit) => {
+  const fetchAllProduct = async (page, limit) => {
     setLoading(true)
-    const res = await ProductService.getProductType(type, page, limit)
+    const res = await ProductService.getAllProduct(page, limit)
     if (res?.status === 'OK') {
       setProducts(res?.data)
       setPaginate({ ...paginate, total: res?.totalPage })
@@ -31,10 +31,8 @@ function TypeProductPage() {
     }
   }
   useEffect(() => {
-    if (state) {
-      fetchProductType(state, paginate.page, paginate.limit)
-    }
-  }, [state, paginate.page, paginate.limit])
+    fetchAllProduct(paginate.page, paginate.limit)
+  }, [paginate.page])
 
   const onChange = (current, pageSize) => {
     console.log(current, pageSize)
@@ -98,4 +96,4 @@ function TypeProductPage() {
   )
 }
 
-export default TypeProductPage
+export default AllProductPage

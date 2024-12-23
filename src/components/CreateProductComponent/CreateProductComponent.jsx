@@ -56,31 +56,52 @@ function CreateProductComponent() {
     queryKey: ['type-product'],
     queryFn: fetchAllTypeProduct
   })
+  // const onFinish = () => {
+  //   const params = {
+  //     name: stateProduct.name,
+  //     price: stateProduct.price,
+  //     description: stateProduct.description,
+  //     rating: stateProduct.rating,
+  //     image: stateProduct.image,
+  //     type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
+  //     countInStock: stateProduct.countInStock,
+  //     discount: stateProduct.discount
+  //   }
+  //   mutation.mutate(params, {
+  //     // onSettled: () => {
+  //     //   queryProduct.refetch()
+  //     // }
+  //     onSuccess: () => {
+  //       console.log(123)
+  //       queryClient.invalidateQueries(['products']) // Làm mới dữ liệu bảng sản phẩm
+  //     }
+  //   })
+  //   console.log(isSuccess, data)
+  //   if (isSuccess && data?.status === 'OK') {
+  //     success('Bạn đã thêm thành công sản phẩm')
+  //     resetStateProduct()
+  //   } else if (isError) {
+  //     onFinishFailed()
+  //   }
+  // }
   const onFinish = () => {
-    const params = {
-      name: stateProduct.name,
-      price: stateProduct.price,
-      description: stateProduct.description,
-      rating: stateProduct.rating,
-      image: stateProduct.image,
-      type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
-      countInStock: stateProduct.countInStock,
-      discount: stateProduct.discount
-    }
-    mutation.mutate(params, {
-      // onSettled: () => {
-      //   queryProduct.refetch()
-      // }
-      onSuccess: () => {
-        queryClient.invalidateQueries(['products']) // Làm mới dữ liệu bảng sản phẩm
+    setStateProduct((prev) => {
+      const updatedState = {
+        ...prev,
+        type: prev.type === 'add_type' ? prev.newType : prev.type
       }
+
+      mutation.mutate(updatedState, {
+        onSuccess: () => {
+          queryClient.invalidateQueries(['products'])
+          success('Bạn đã thêm thành công sản phẩm')
+          resetStateProduct()
+        },
+        onError: onFinishFailed
+      })
+
+      return updatedState // Trả về trạng thái mới
     })
-    if (isSuccess && data?.status === 'OK') {
-      success('Bạn đã thêm thành công sản phẩm')
-      resetStateProduct()
-    } else if (isError) {
-      onFinishFailed()
-    }
   }
   const handleOnChange = (e) => {
     // setStateProduct({
@@ -92,7 +113,6 @@ function CreateProductComponent() {
       ...prev,
       [e.target.name]: e.target.value
     }))
-    console.log(stateProduct)
   }
   const handleOnChangeAvatar = async ({ fileList }) => {
     const file = fileList[0]

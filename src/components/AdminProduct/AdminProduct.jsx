@@ -33,7 +33,7 @@ function AdminProduct() {
     return res
   })
   const getAllProduct = async () => {
-    const res = await ProductService.getAllProduct({ search: '', limit: 100 })
+    const res = await ProductService.getProductBySearch({ search: '', limit: 3 })
     return res
   }
 
