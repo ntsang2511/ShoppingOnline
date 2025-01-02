@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
 import * as OrderService from '../../services/OrderService'
 import Loading from '../../components/LoadingComponent/Loading'
 import { useSelector } from 'react-redux'
@@ -12,39 +11,35 @@ import {
 } from './style'
 import { convertPrice } from '../../utils'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useMutationHook } from '../../hooks/useMutationHook'
 import { useEffect } from 'react'
 import { error, success } from '../../components/Message/Message'
+import { useQueryClient } from '@tanstack/react-query'
 
-function MyOrderPage() {
+function OrderShiperPage() {
+  const queryClient = useQueryClient()
   const location = useLocation()
   const { state } = location
-  const navigate = useNavigate()
   const user = useSelector((state) => state.user)
-  const fetchMyOrder = async () => {
-    const res = await OrderService.getOrderByUserId(user?.id, user?.access_token)
-    return res.data
-  }
 
-  const queryOrder = useQuery(
-    {
-      queryKey: ['orders'],
-      queryFn: fetchMyOrder
-    }
-    // {
-    //   enabled: state?.id && state?.token
-    // }
-  )
+  const mutationCheckDelivery = useMutationHook((data) => {
+    const res = OrderService.deliveryCheck(data)
+    return res
+  })
+  const mutationGetAll = useMutationHook((data) => {
+    const res = OrderService.getAllOrderShipper()
+    return res
+  })
 
-  const { isPending, data } = queryOrder
-  console.log(data)
+  useEffect(() => {
+    mutationGetAll.mutate()
+  }, [])
+
+  const { data: dataShip, isPending: isPendingShip } = mutationGetAll
   const handleDetailsOrder = (id) => {
-    navigate(`/details-order/${id}`, {
-      state: {
-        token: state?.token
-      }
-    })
+    console.log(id)
+    mutationCheckDelivery.mutate({ orderId: id })
   }
   const mutation = useMutationHook((data) => {
     const { id, token } = data
@@ -52,17 +47,9 @@ function MyOrderPage() {
     return res
   })
   const handleCancelOrder = (order) => {
-    mutation.mutate(
-      { id: order._id, token: state?.token },
-      {
-        onSettled: () => {
-          queryOrder.refetch()
-        }
-      }
-    )
+    mutation.mutate({ id: order._id, token: state?.token })
   }
   const { isPending: isLoadingCancel, isSuccess: isSuccessCancel, isError: isErrorCancle, data: dataCancel } = mutation
-  console.log(isSuccessCancel, isErrorCancle, dataCancel)
   useEffect(() => {
     if (isSuccessCancel && dataCancel?.status === 'OK') {
       success('Đã xóa đơn hàng thành công')
@@ -72,6 +59,18 @@ function MyOrderPage() {
       error()
     }
   }, [isErrorCancle, isSuccessCancel])
+
+  useEffect(() => {
+    if (mutationCheckDelivery?.isSuccess) {
+      mutationGetAll.mutate() // Gọi lại API khi mutationCheckDelivery thành công
+    }
+  }, [mutationCheckDelivery?.isSuccess])
+
+  useEffect(() => {
+    if (mutation?.isSuccess) {
+      mutationGetAll.mutate() // Gọi lại API khi mutation thành công
+    }
+  }, [mutation?.isSuccess])
   const renderProduct = (data) => {
     return data?.map((order) => {
       return (
@@ -102,13 +101,13 @@ function MyOrderPage() {
       )
     })
   }
-  return data?.length > 0 ? (
-    <Loading isLoading={isPending || isLoadingCancel}>
+  return dataShip?.data?.length > 0 ? (
+    <Loading isLoading={isPendingShip || isLoadingCancel}>
       <WrapperContainer>
         <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2rem', color: 'red' }}>Đơn hàng của tôi</h2>
+          <h2 style={{ fontSize: '2rem', color: 'red' }}>Đơn hàng cần giao</h2>
           <WrapperListOrder>
-            {data?.map((order) => {
+            {dataShip?.data?.map((order) => {
               return (
                 <WrapperItemOrder key={order?._id}>
                   <WrapperStatus>
@@ -154,7 +153,7 @@ function MyOrderPage() {
                           border: '1px solid #9255FD',
                           borderRadius: '4px'
                         }}
-                        textButton="Xem chi tiết"
+                        textButton="Đã giao hàng"
                         styleTextButton={{ color: '#9255FD', fontSize: '14px' }}
                       ></ButtonComponent>
                     </div>
@@ -168,15 +167,9 @@ function MyOrderPage() {
     </Loading>
   ) : (
     <div style={{ display: 'flex', justifyContent: 'center', color: 'red' }}>
-      <h1>
-        Bạn hiện chưa đặt hàng, hãy quay lại{' '}
-        <a href="/" style={{ textDecoration: 'underline' }}>
-          trang chủ
-        </a>{' '}
-        để đặt hàng
-      </h1>
+      <h1>Không có đơn hàng nào cần dược giao</h1>
     </div>
   )
 }
 
-export default MyOrderPage
+export default OrderShiperPage

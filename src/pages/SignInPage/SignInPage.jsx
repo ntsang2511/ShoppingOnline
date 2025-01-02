@@ -13,7 +13,6 @@ import * as message from '../../components/Message/Message'
 import { jwtDecode } from 'jwt-decode'
 import { useDispatch } from 'react-redux'
 import { updateUser } from '../../redux/slices/userSlice'
-
 function SignInPage() {
   const [isShowPassword, setIsShowPassword] = useState(false)
   const location = useLocation()
@@ -22,6 +21,7 @@ function SignInPage() {
   const dispatch = useDispatch()
 
   const mutation = useMutationHook((data) => UserService.loginUser(data))
+
   const { data, isPending, isSuccess } = mutation
 
   useEffect(() => {
@@ -51,7 +51,6 @@ function SignInPage() {
     const res = await UserService.getDetailsUser(id, token)
     dispatch(updateUser({ ...res?.data, access_token: token }))
   }
-
   const onClick = () => {
     setIsShowPassword((prev) => !prev)
   }

@@ -16,6 +16,10 @@ import { resetUser } from '../../redux/slices/userSlice'
 import { useEffect, useState } from 'react'
 import Loading from '../LoadingComponent/Loading'
 import { searchProduct } from '../../redux/slices/productSlice'
+import { resetOrder, setOrderItems } from '../../redux/slices/orderSlice'
+import * as CartService from '../../services/CartService'
+import { useMutationHook } from '../../hooks/useMutationHook'
+
 function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
   const navigate = useNavigate()
   const user = useSelector((state) => state.user)
@@ -25,7 +29,13 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const order = useSelector((state) => state.order)
+  const [cartItems, setCartItems] = useState([])
   const [isOpenPopup, setIsOpenPopup] = useState(false)
+  const mutation = useMutationHook((data) => {
+    const { userId } = data
+    const res = CartService.getCart(userId)
+    return res
+  })
   const handleNavigateLogin = () => {
     navigate('/sign-in')
   }
@@ -34,23 +44,56 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
     setLoading(true)
     await UserService.logoutUser()
     dispatch(resetUser())
+    dispatch(resetOrder())
     setLoading(false)
     navigate('/')
   }
 
+  const { data, isPending, isSuccess, isError } = mutation
+
+  // useEffect(() => {
+  //   setLoading(true)
+  //   setUserName(user?.name)
+  //   setUserAvatar(user?.avatar)
+  //   mutation.mutate({ userId: user.id })
+  //   console.log(data)
+  //   setLoading(false)
+  // }, [user?.name, user?.avatar])
+
   useEffect(() => {
-    setLoading(true)
+    // Chỉ gọi API nếu người dùng đã đăng nhập
+    if (user?.id && !cartItems.length) {
+      setLoading(true)
+      mutation.mutate(
+        { userId: user.id },
+        {
+          onSuccess: (response) => {
+            setCartItems(response?.data?.items || [])
+            dispatch(setOrderItems({ items: response?.data?.items }))
+            setLoading(false)
+          },
+          onError: () => {
+            setLoading(false)
+          }
+        }
+      )
+    }
+    if (!user?.id) {
+      dispatch(resetOrder())
+    }
+
+    // Cập nhật thông tin user
     setUserName(user?.name)
     setUserAvatar(user?.avatar)
-    setLoading(false)
-  }, [user?.name, user?.avatar])
-
+  }, [user])
   const onSearch = (e) => {
     setSearch(e.target.value)
   }
 
   const onClickButtonSearch = () => {
-    dispatch(searchProduct(search))
+    if (search.trim()) {
+      dispatch(searchProduct(search))
+    }
   }
   const handleClickNavigate = (type = '') => {
     if (type === 'profile') {
@@ -64,6 +107,8 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
           token: user?.access_token
         }
       })
+    } else if (type === 'order-shiper') {
+      navigate('/order-shiper')
     } else {
       handleLogOut()
     }
@@ -132,6 +177,11 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
                       {user?.isAdmin && (
                         <WrapperContentPopUp onClick={() => handleClickNavigate('admin')}>
                           Quản lý hệ thống
+                        </WrapperContentPopUp>
+                      )}
+                      {user?.isShipper && (
+                        <WrapperContentPopUp onClick={() => handleClickNavigate('order-shiper')}>
+                          Thông tin đơn hàng cần giao
                         </WrapperContentPopUp>
                       )}
                       <WrapperContentPopUp onClick={() => handleClickNavigate('profile')}>

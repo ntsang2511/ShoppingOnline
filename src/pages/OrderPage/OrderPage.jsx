@@ -33,6 +33,7 @@ import { debounce } from 'lodash'
 import { useMutationHook } from '../../hooks/useMutationHook'
 import { updateUser } from '../../redux/slices/userSlice'
 import { useNavigate } from 'react-router-dom'
+import * as CartService from '../../services/CartService'
 import StepComponent from '../../components/StepComponent/StepComponent'
 function OrderPage() {
   const navigate = useNavigate()
@@ -50,6 +51,27 @@ function OrderPage() {
   const dispatch = useDispatch()
   const [listChecked, setListChecked] = useState([])
 
+  const mutationDeleteOne = useMutationHook((data) => {
+    const res = CartService.removeItem(data)
+    return res
+  })
+
+  const mutationDeleteAll = useMutationHook((data) => {
+    const res = CartService.clearCart(data)
+    return res
+  })
+
+  const mutation = useMutationHook((data) => {
+    const res = CartService.addItemCart(data)
+    return res
+  })
+
+  const mutationAmount = useMutationHook((data) => {
+    console.log(data)
+    return CartService.updateItemAmount(data) // Giả sử API này tồn tại trong `CartService`
+  })
+  const { data: dataAddCart, isPending: isPendingCart, isSuccess, isError } = mutation
+  const { data } = mutationDeleteAll
   const onChange = (e) => {
     if (listChecked.includes(e.target.value)) {
       const newListChecked = listChecked.filter((item) => {
@@ -60,15 +82,49 @@ function OrderPage() {
       setListChecked([...listChecked, e.target.value])
     }
   }
-  const handleChangeCount = (type, idProduct) => {
+  // const handleChangeCount = (type, idProduct, order) => {
+  //   const newAmount = type === 'increase' ? order?.amount + 1 : order?.amount - 1
+
+  //   if (newAmount < 1 || newAmount > order?.countInStock) {
+  //     error('Số lượng không hợp lệ')
+  //     return
+  //   }
+  //   console.log(order, order?.amount)
+  //   // Dispatch để cập nhật trên frontend (Redux)
+  //   if (type === 'increase') {
+  //     dispatch(increaseAmount({ idProduct }))
+  //   } else {
+  //     dispatch(decreaseAmount({ idProduct }))
+  //   }
+
+  //   // Gửi cập nhật đến backend
+  //   mutationAmount.mutate({
+  //     userId: user?.id,
+  //     product: idProduct,
+  //     amount: newAmount // Số lượng mới
+  //   })
+  // }
+  const handleChangeCount = (type, idProduct, order) => {
+    const newAmount = type === 'increase' ? order?.amount + 1 : order?.amount - 1
+    if (newAmount < 1 || newAmount > order?.countInStock) {
+      error('Số lượng không hợp lệ')
+      return
+    }
+    console.log(order)
     if (type === 'increase') {
       dispatch(increaseAmount({ idProduct }))
     } else {
       dispatch(decreaseAmount({ idProduct }))
     }
-  }
 
+    mutationAmount.mutate({
+      userId: user?.id,
+      product: idProduct,
+      amount: newAmount // Số lượng mới
+    })
+  }
   const handleDeleteOrder = (idProduct) => {
+    mutationDeleteOne.mutate({ userId: user.id, product: idProduct })
     dispatch(removeOrderProduct({ idProduct }))
   }
   const handleOnChangeCheckAll = (e) => {
@@ -86,6 +142,10 @@ function OrderPage() {
   const handleRemoveAllOrder = () => {
     if (listChecked?.length > 1) {
       dispatch(removeAllOrderProduct({ listChecked }))
+      mutationDeleteAll.mutate({
+        userId: user.id,
+        productIds: listChecked
+      })
     }
   }
 
@@ -194,7 +254,6 @@ function OrderPage() {
       )
     }
   }
-
   const itemStep = [
     {
       title: '20.000 VND',
@@ -272,7 +331,7 @@ function OrderPage() {
                         </span>
                         <WrapperCountOrder>
                           <button
-                            onClick={() => handleChangeCount('decrease', ord?.product)}
+                            onClick={() => handleChangeCount('decrease', ord?.product, ord)}
                             style={{ border: 'none', backgroundColor: 'transparent' }}
                           >
                             <MinusOutlined style={{ fontSize: '20px' }} size="14px" min={1} max={ord?.countInStock} />
@@ -285,7 +344,7 @@ function OrderPage() {
                             size="small"
                           />
                           <button
-                            onClick={() => handleChangeCount('increase', ord?.product)}
+                            onClick={() => handleChangeCount('increase', ord?.product, ord)}
                             style={{ border: 'none', backgroundColor: 'transparent' }}
                           >
                             <PlusOutlined style={{ fontSize: '20px' }} size="14px" min={1} max={ord?.countInStock} />

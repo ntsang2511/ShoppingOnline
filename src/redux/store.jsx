@@ -4,7 +4,6 @@ import userReducer from './slices/userSlice'
 import orderReducer from './slices/orderSlice'
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
-
 const persistConfig = {
   key: 'root',
   version: 1,

@@ -77,7 +77,16 @@ const DetailsOrderPage = () => {
             </WrapperInfoUser>
           </WrapperHeaderUser>
           <WrapperStyleContent>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '20px',
+                fontWeight: 'bold'
+              }}
+            >
               <div style={{ width: '670px' }}>Sản phẩm</div>
               <WrapperItemLabel>Giá</WrapperItemLabel>
               <WrapperItemLabel>Số lượng</WrapperItemLabel>
@@ -99,7 +108,7 @@ const DetailsOrderPage = () => {
                     />
                     <div
                       style={{
-                        width: 260,
+                        width: '260px',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',

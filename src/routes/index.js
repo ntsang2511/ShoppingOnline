@@ -9,6 +9,7 @@ import HomePage from '../pages/HomePage/HomePage'
 import MyOrderPage from '../pages/MyOrderPage/MyOrderPage'
 import NotFoundPage from '../pages/NotFoundPage/NotFoundPage'
 import OrderPage from '../pages/OrderPage/OrderPage'
+import OrderShiperPage from '../pages/OrderShiperPage/OrderShiperPage'
 import OrderSuccess from '../pages/OrderSuccess/OrderSuccess'
 import PaymentPage from '../pages/PaymentPage/PaymentPage'
 import ProductDetailsPage from '../pages/ProductDetailsPage/ProductDetailsPage'
@@ -32,6 +33,11 @@ export const routes = [
   {
     path: '/my-order',
     page: MyOrderPage,
+    isShowHeader: true
+  },
+  {
+    path: '/order-shiper',
+    page: OrderShiperPage,
     isShowHeader: true
   },
   {

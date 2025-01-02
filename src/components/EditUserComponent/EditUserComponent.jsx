@@ -25,7 +25,8 @@ function EditUserComponent() {
     phone: '',
     isAdmin: false,
     avatar: '',
-    address: ''
+    address: '',
+    isShipper: false
   })
   const mutationUpdate = useMutationHook((data) => {
     const { id, token, ...rests } = data
@@ -59,7 +60,8 @@ function EditUserComponent() {
         phone: res?.data?.phone,
         isAdmin: res?.data?.isAdmin,
         avatar: res?.data?.avatar,
-        address: res?.data?.address
+        address: res?.data?.address,
+        isShipper: res?.data?.isShipper || false
       })
     }
     setIsPendingUpdate(false)
@@ -175,6 +177,12 @@ function EditUserComponent() {
           <Form.Item label="Role" name="isAdmin">
             <Radio.Group name="isAdmin" onChange={handleOnChangeDetails} value={stateUserDetails.isAdmin}>
               <Radio value={true}>Admin</Radio>
+              <Radio value={false}>User</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Role" name="isShipper">
+            <Radio.Group name="isShipper" onChange={handleOnChangeDetails} value={stateUserDetails.isShipper}>
+              <Radio value={true}>Shipper</Radio>
               <Radio value={false}>User</Radio>
             </Radio.Group>
           </Form.Item>

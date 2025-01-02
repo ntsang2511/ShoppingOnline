@@ -44,10 +44,10 @@ function TypeProductPage() {
     <Loading isLoading={loading}>
       <div style={{ padding: '0 120px', backgroundColor: '#efefef', height: '100vh' }}>
         <Row style={{ flexWrap: 'nowrap', paddingtop: '10px' }}>
-          <WrapperNavbar span={4}>
+          {/* <WrapperNavbar span={4}>
             <NavbarComponent />
-          </WrapperNavbar>
-          <Col span={20} style={{ marginTop: '25px' }}>
+          </WrapperNavbar> */}
+          <Col span={24} style={{ marginTop: '25px' }}>
             <div
               style={{
                 display: 'flex',
@@ -87,7 +87,7 @@ function TypeProductPage() {
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '170px' }}>
           <Pagination
             current={paginate?.page + 1}
-            pageSize={12}
+            pageSize={10}
             defaultCurrent={1}
             total={paginate?.total * paginate?.limit}
             onChange={onChange}

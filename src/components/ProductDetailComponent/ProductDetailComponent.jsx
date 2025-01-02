@@ -18,7 +18,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { addOrderProduct } from '../../redux/slices/orderSlice'
 import { convertPrice } from '../../utils'
-
+import { useMutationHook } from '../../hooks/useMutationHook'
+import * as CartService from '../../services/CartService'
 function ProductDetailComponent({ idProduct }) {
   const user = useSelector((state) => state.user)
   const order = useSelector((state) => state.order)
@@ -27,6 +28,12 @@ function ProductDetailComponent({ idProduct }) {
   const dispatch = useDispatch()
 
   const [numProduct, setNumProduct] = useState(1)
+
+  const mutation = useMutationHook((data) => {
+    const res = CartService.addItemCart(data)
+    return res
+  })
+
   const onChange = (e) => {
     setNumProduct(Number(e.target.value))
   }
@@ -63,6 +70,8 @@ function ProductDetailComponent({ idProduct }) {
     }
   }
 
+  const { data, isPending: isPendingCart, isSuccess, isError } = mutation
+
   const handleAddOrderProduct = () => {
     if (!user?.id) {
       navigate('/sign-in', { state: location.pathname })
@@ -80,6 +89,16 @@ function ProductDetailComponent({ idProduct }) {
           }
         })
       )
+      mutation.mutate({
+        name: productDetails?.name,
+        amount: numProduct,
+        image: productDetails?.image,
+        price: productDetails?.price,
+        product: productDetails?._id,
+        discount: productDetails?.discount,
+        countInStock: productDetails?.countInStock,
+        userId: user?.id
+      })
     }
   }
 
@@ -103,6 +122,8 @@ function ProductDetailComponent({ idProduct }) {
       )
     })
   }
+
+  console.log('data', data)
   return (
     <Loading isLoading={isPending || isFetching}>
       <Row style={{ padding: '16px', backgroundColor: '#333' }}>

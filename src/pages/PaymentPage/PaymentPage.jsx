@@ -16,6 +16,7 @@ import { updateUser } from '../../redux/slices/userSlice'
 import { useNavigate } from 'react-router-dom'
 import { removeAllOrderProduct } from '../../redux/slices/orderSlice'
 import * as PaymentService from '../../services/PaymentService'
+import * as CartService from '../../services/CartService'
 function PaymentPage() {
   const [delivery, setDelivery] = useState('fast')
   const [payment, setPayment] = useState('later_money')
@@ -31,7 +32,6 @@ function PaymentPage() {
   const order = useSelector((state) => state.order)
   const user = useSelector((state) => state.user)
   const dispatch = useDispatch()
-
   const handleOnChangeDetails = useCallback(
     debounce((e) => {
       setStateUserDetails((prevState) => ({
@@ -109,6 +109,13 @@ function PaymentPage() {
   } = mutationUpdate
   const { data, isPending, isSuccess, isError } = mutationAddOrder
 
+  const mutationDeleteAll = useMutationHook((data) => {
+    const res = CartService.clearCart(data)
+    return res
+  })
+
+  const { data: dataDeleteCart } = mutationDeleteAll
+
   useEffect(() => {
     if (isSuccess && data?.status === 'OK') {
       const arrayOrder = []
@@ -116,6 +123,10 @@ function PaymentPage() {
         arrayOrder.push(element.product)
       })
       dispatch(removeAllOrderProduct({ listChecked: arrayOrder }))
+      mutationDeleteAll.mutate({
+        userId: user.id,
+        productIds: arrayOrder
+      })
       success('Đặt hàng thành công')
       console.log(data)
       if (payment !== 'zalopayapp') {
