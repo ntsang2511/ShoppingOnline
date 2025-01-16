@@ -116,7 +116,7 @@ function EditUserComponent() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'center', color: 'red', fontSize: '1.7rem' }}>
-        <h1>Chỉnh sửa sản phẩm</h1>
+        <h1>Chỉnh sửa thông tin người dùng</h1>
       </div>
       <Loading isLoading={isPendingUpdate || isLoadingUpdate}>
         <Form

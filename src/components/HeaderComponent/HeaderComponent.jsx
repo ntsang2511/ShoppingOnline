@@ -109,6 +109,8 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
       })
     } else if (type === 'order-shiper') {
       navigate('/order-shiper')
+    } else if (type === 'my-shipped-order') {
+      navigate('/my-shipped-order')
     } else {
       handleLogOut()
     }
@@ -189,6 +191,9 @@ function HeaderComponent({ isHiddenSearch = false, isHiddenCart = false }) {
                       </WrapperContentPopUp>
                       <WrapperContentPopUp onClick={() => handleClickNavigate(`my-order`)}>
                         Đơn hàng của tôi
+                      </WrapperContentPopUp>
+                      <WrapperContentPopUp onClick={() => handleClickNavigate(`my-shipped-order`)}>
+                        Đánh giá đơn hàng
                       </WrapperContentPopUp>
                       <Divider style={{ margin: '0' }} />
                       <WrapperContentPopUp onClick={() => handleClickNavigate()}>Đăng xuất</WrapperContentPopUp>

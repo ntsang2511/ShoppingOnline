@@ -5,7 +5,7 @@ import { WrapperUploadFile } from './style'
 import { getBase64, renderOptions } from '../../utils.js'
 import { useState } from 'react'
 import Compressor from 'compressorjs'
-import { UploadOutlined } from '@ant-design/icons'
+import { StarFilled, UploadOutlined } from '@ant-design/icons'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import * as ProductService from '../../services/ProductService'
 import { error, success } from '../Message/Message'
@@ -56,34 +56,6 @@ function CreateProductComponent() {
     queryKey: ['type-product'],
     queryFn: fetchAllTypeProduct
   })
-  // const onFinish = () => {
-  //   const params = {
-  //     name: stateProduct.name,
-  //     price: stateProduct.price,
-  //     description: stateProduct.description,
-  //     rating: stateProduct.rating,
-  //     image: stateProduct.image,
-  //     type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
-  //     countInStock: stateProduct.countInStock,
-  //     discount: stateProduct.discount
-  //   }
-  //   mutation.mutate(params, {
-  //     // onSettled: () => {
-  //     //   queryProduct.refetch()
-  //     // }
-  //     onSuccess: () => {
-  //       console.log(123)
-  //       queryClient.invalidateQueries(['products']) // Làm mới dữ liệu bảng sản phẩm
-  //     }
-  //   })
-  //   console.log(isSuccess, data)
-  //   if (isSuccess && data?.status === 'OK') {
-  //     success('Bạn đã thêm thành công sản phẩm')
-  //     resetStateProduct()
-  //   } else if (isError) {
-  //     onFinishFailed()
-  //   }
-  // }
   const onFinish = () => {
     setStateProduct((prev) => {
       const updatedState = {
@@ -137,6 +109,19 @@ function CreateProductComponent() {
       type: value
     })
     console.log(stateProduct)
+  }
+  const handleChangeRating = (value) => {
+    setStateProduct({
+      ...stateProduct,
+      rating: value
+    })
+  }
+  const renderStar = (rating) => {
+    return (
+      <div>
+        {rating} <StarFilled style={{ color: 'yellow' }} />
+      </div>
+    )
   }
   return (
     <div>
@@ -260,7 +245,38 @@ function CreateProductComponent() {
               }
             ]}
           >
-            <InputComponent name="rating" value={stateProduct.rating} onChange={handleOnChange} />
+            <Select
+              style={{
+                width: 120,
+                border: '2px solid #000',
+                borderRadius: '8px'
+              }}
+              name="rating"
+              value={stateProduct.rating}
+              onChange={handleChangeRating}
+              options={[
+                {
+                  value: '1',
+                  label: renderStar(1)
+                },
+                {
+                  value: '2',
+                  label: renderStar(2)
+                },
+                {
+                  value: '3',
+                  label: renderStar(3)
+                },
+                {
+                  value: '4',
+                  label: renderStar(4)
+                },
+                {
+                  value: '5',
+                  label: renderStar(5)
+                }
+              ]}
+            />
           </Form.Item>
           <Form.Item
             label="Discount"

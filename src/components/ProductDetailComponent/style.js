@@ -73,3 +73,27 @@ export const WrapperInputNumber = styled(InputNumber)`
     }
   }
 `
+export const ReviewFormContainer = styled.section`
+  margin: 20px auto;
+  width: 100%;
+  padding: 20px;
+  border-top: 1px solid #ccc;
+`
+export const ReviewListContainer = styled.section`
+  margin: 20px auto;
+  marginbottom: 1000px;
+  color: white;
+  width: 80%;
+`
+export const ReviewItem = styled.li`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  list-style-type: none;
+  background: white;
+  margin-bottom: 10px;
+  margin-left: 0;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`

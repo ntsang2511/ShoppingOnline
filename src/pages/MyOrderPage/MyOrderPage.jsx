@@ -106,7 +106,7 @@ function MyOrderPage() {
     <Loading isLoading={isPending || isLoadingCancel}>
       <WrapperContainer>
         <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2rem', color: 'red' }}>Đơn hàng của tôi</h2>
+          <h2 style={{ fontSize: '2rem', color: 'red', margin: 0, paddingTop: '20px' }}>Đơn hàng của tôi</h2>
           <WrapperListOrder>
             {data?.map((order) => {
               return (
@@ -167,7 +167,7 @@ function MyOrderPage() {
       </WrapperContainer>
     </Loading>
   ) : (
-    <div style={{ display: 'flex', justifyContent: 'center', color: 'red' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', color: 'red', backgroundColor: '#333' }}>
       <h1>
         Bạn hiện chưa đặt hàng, hãy quay lại{' '}
         <a href="/" style={{ textDecoration: 'underline' }}>

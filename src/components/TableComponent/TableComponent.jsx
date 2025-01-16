@@ -91,7 +91,9 @@ function TableComponent({
             Xóa tất cả
           </div>
         )}
-        <button onClick={exportExcel}>Export excel</button>
+        <button onClick={exportExcel} style={{ backgroundColor: 'green', padding: '1rem 1.5rem', color: 'white' }}>
+          Export excel
+        </button>
         <Table
           rowSelection={{
             type: selectionType,

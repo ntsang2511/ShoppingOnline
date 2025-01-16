@@ -11,67 +11,27 @@ import {
 } from './style'
 import { convertPrice } from '../../utils'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutationHook } from '../../hooks/useMutationHook'
 import { useEffect } from 'react'
 import { error, success } from '../../components/Message/Message'
-import { useQueryClient } from '@tanstack/react-query'
 
-function OrderShiperPage() {
-  const queryClient = useQueryClient()
+function MyShippedOrderPage() {
   const location = useLocation()
   const { state } = location
   const user = useSelector((state) => state.user)
+  const navigate = useNavigate()
 
-  const mutationCheckDelivery = useMutationHook((data) => {
-    console.log(data)
-    const res = OrderService.deliveryCheck(data)
+  const mutationGetAllShippedOrder = useMutationHook((data) => {
+    const res = OrderService.getShippedOrder(data)
     return res
   })
-  const mutationGetAll = useMutationHook((data) => {
-    const res = OrderService.getAllOrderShipper()
-    return res
-  })
+  const { data, isPending, isSuccess } = mutationGetAllShippedOrder
 
   useEffect(() => {
-    mutationGetAll.mutate()
+    mutationGetAllShippedOrder.mutate(user.id)
   }, [])
 
-  const { data: dataShip, isPending: isPendingShip } = mutationGetAll
-  const handleConfirmShipped = (id) => {
-    console.log(id)
-    mutationCheckDelivery.mutate({ orderId: id })
-  }
-  const mutation = useMutationHook((data) => {
-    const { id, token } = data
-    const res = OrderService.cancelOrder(id, token)
-    return res
-  })
-  const handleCancelOrder = (order) => {
-    mutation.mutate({ id: order._id, token: state?.token })
-  }
-  const { isPending: isLoadingCancel, isSuccess: isSuccessCancel, isError: isErrorCancle, data: dataCancel } = mutation
-  useEffect(() => {
-    if (isSuccessCancel && dataCancel?.status === 'OK') {
-      success('Đã xóa đơn hàng thành công')
-    } else if (isSuccessCancel && dataCancel?.status === 'ERR') {
-      error('Xóa dơn hàng thất bại')
-    } else if (isErrorCancle) {
-      error()
-    }
-  }, [isErrorCancle, isSuccessCancel])
-
-  useEffect(() => {
-    if (mutationCheckDelivery?.isSuccess) {
-      mutationGetAll.mutate() // Gọi lại API khi mutationCheckDelivery thành công
-    }
-  }, [mutationCheckDelivery?.isSuccess])
-
-  useEffect(() => {
-    if (mutation?.isSuccess) {
-      mutationGetAll.mutate() // Gọi lại API khi mutation thành công
-    }
-  }, [mutation?.isSuccess])
   const renderProduct = (data) => {
     return data?.map((order) => {
       return (
@@ -102,13 +62,17 @@ function OrderShiperPage() {
       )
     })
   }
-  return dataShip?.data?.length > 0 ? (
-    <Loading isLoading={isPendingShip || isLoadingCancel}>
+  const handleRatingProduct = (order) => {
+    const productId = order.orderItems[0].product
+    navigate(`/product-details/${productId}`)
+  }
+  return data?.data?.length > 0 ? (
+    <Loading isLoading={isPending}>
       <WrapperContainer>
         <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2rem', color: 'red', margin: 0, paddingTop: '20px' }}>Đơn hàng cần giao</h2>
+          <h2 style={{ fontSize: '2rem', color: 'red', margin: 0, paddingTop: '20px' }}>Đơn hàng đã giao của bạn</h2>
           <WrapperListOrder>
-            {dataShip?.data?.map((order) => {
+            {data?.data?.map((order) => {
               return (
                 <WrapperItemOrder key={order?._id}>
                   <WrapperStatus>
@@ -136,25 +100,14 @@ function OrderShiperPage() {
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <ButtonComponent
-                        onClick={() => handleCancelOrder(order)}
+                        onClick={() => handleRatingProduct(order)}
                         size={40}
                         styleButton={{
                           height: '36px',
                           border: '1px solid #9255FD',
                           borderRadius: '4px'
                         }}
-                        textButton="Hủy đơn hàng"
-                        styleTextButton={{ color: '#9255FD', fontSize: '14px' }}
-                      ></ButtonComponent>
-                      <ButtonComponent
-                        onClick={() => handleConfirmShipped(order?._id)}
-                        size={40}
-                        styleButton={{
-                          height: '36px',
-                          border: '1px solid #9255FD',
-                          borderRadius: '4px'
-                        }}
-                        textButton="Đã giao hàng"
+                        textButton="Đánh giá sản phẩm"
                         styleTextButton={{ color: '#9255FD', fontSize: '14px' }}
                       ></ButtonComponent>
                     </div>
@@ -173,4 +126,4 @@ function OrderShiperPage() {
   )
 }
 
-export default OrderShiperPage
+export default MyShippedOrderPage

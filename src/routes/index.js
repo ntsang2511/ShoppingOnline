@@ -7,6 +7,7 @@ import CallbackPage from '../pages/CallbackPage/CallbackPage'
 import DetailsOrderPage from '../pages/DetailsOrderPage/DetailsOrderPage'
 import HomePage from '../pages/HomePage/HomePage'
 import MyOrderPage from '../pages/MyOrderPage/MyOrderPage'
+import MyShippedOrderPage from '../pages/MyShippedOrderPage/MyShippedOrderPage'
 import NotFoundPage from '../pages/NotFoundPage/NotFoundPage'
 import OrderPage from '../pages/OrderPage/OrderPage'
 import OrderShiperPage from '../pages/OrderShiperPage/OrderShiperPage'
@@ -33,6 +34,11 @@ export const routes = [
   {
     path: '/my-order',
     page: MyOrderPage,
+    isShowHeader: true
+  },
+  {
+    path: '/my-shipped-order',
+    page: MyShippedOrderPage,
     isShowHeader: true
   },
   {
