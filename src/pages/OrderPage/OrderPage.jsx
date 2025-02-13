@@ -249,6 +249,7 @@ function OrderPage() {
           onSuccess: () => {
             dispatch(updateUser({ name, address, city, phone }))
             setIsOpenModalUpdateInfo(false)
+            window.location.reload()
           }
         }
       )
@@ -272,7 +273,7 @@ function OrderPage() {
   return (
     <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
       <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
-        <h2 style={{ padding: '10px' }}>Giỏ hàng</h2>
+        <h2 style={{ padding: '10px', fontSize: '2rem' }}>Giỏ hàng</h2>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <WrapperLeft>
             <WrapperStyleHeaderDelivery>

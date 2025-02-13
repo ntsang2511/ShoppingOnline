@@ -1,8 +1,6 @@
-import { Button, Col, Form, Image, Rate, Row, Select } from 'antd'
+import { Button, Col, Form, Image, Pagination, Rate, Row, Select } from 'antd'
 import {
-  ReviewFormContainer,
   ReviewItem,
-  ReviewListContainer,
   WrapperAddressProduct,
   WrapperInputNumber,
   WrapperPriceProduct,
@@ -13,9 +11,11 @@ import {
 } from './style'
 import { DeleteOutlined, MinusOutlined, PlusOutlined, StarFilled } from '@ant-design/icons'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
+import { updateUser } from '../../redux/slices/userSlice'
+
 import { useQuery } from '@tanstack/react-query'
 import Loading from '../LoadingComponent/Loading'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { addOrderProduct } from '../../redux/slices/orderSlice'
@@ -24,11 +24,22 @@ import { useMutationHook } from '../../hooks/useMutationHook'
 import * as ProductService from '../../services/ProductService'
 import * as CartService from '../../services/CartService'
 import * as ProductRatingService from '../../services/ProductRatingService'
+import * as UserService from '../../services/UserService'
 import TextArea from 'antd/es/input/TextArea'
+import LikeButtonComponent from '../LikeButtonComponent/LikeButtonComponent'
+import ModalComponent from '../ModalComponent/ModalComponent'
+import InputComponent from '../InputComponent/InputComponent'
+import { debounce } from 'lodash'
+
 function ProductDetailComponent({ idProduct }) {
-  console.log(idProduct)
+  const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
+  const [stateUserDetails, setStateUserDetails] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    city: ''
+  })
   const user = useSelector((state) => state.user)
-  const order = useSelector((state) => state.order)
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
@@ -40,13 +51,18 @@ function ProductDetailComponent({ idProduct }) {
     comment: ''
   })
   const [numProduct, setNumProduct] = useState(1)
-
+  const [paginate, setPaginate] = useState({
+    page: 0,
+    limit: 10,
+    total: 1
+  })
   const mutation = useMutationHook((data) => {
     const res = CartService.addItemCart(data)
     return res
   })
   const mutationProductRating = useMutationHook((data) => {
     const res = ProductRatingService.getProductRating(data)
+
     return res
   })
   const mutationCreateRating = useMutationHook((data) => {
@@ -62,20 +78,22 @@ function ProductDetailComponent({ idProduct }) {
     const res = ProductService.updateProduct(data.id, user.access_token, data.data)
     return res
   })
+  const mutationUpdate = useMutationHook((data) => {
+    const { id, token, ...rests } = data
+    const res = UserService.updateUser(id, rests.data, token)
+    return res
+  })
 
   const onChange = (e) => {
     setNumProduct(Number(e.target.value))
   }
   const fetchGetProductDetails = async (context) => {
-    console.log(context)
     const id = context?.queryKey && context?.queryKey[1]
-    console.log(id)
     if (id) {
       const res = await ProductService.getDetailsProduct(id)
       return res.data
     }
   }
-  console.log(idProduct)
   const {
     isPending,
     data: productDetails,
@@ -106,23 +124,49 @@ function ProductDetailComponent({ idProduct }) {
   const { data: dataProductRating, isPending: isPendingRating } = mutationProductRating
   const { data: dataCreateProductRating, isPending: isPendingCreateRating, isSuccess } = mutationCreateRating
   const { isPending: isPendingDelete, isSuccess: isSuccessDelete } = mutationDeleteRating
+  const {
+    data: updatedData,
+    isPending: isLoadingUpdate,
+    isSuccess: isSuccessUpdated,
+    isError: isErrorUpdated
+  } = mutationUpdate
   useEffect(() => {
     if (productDetails?.name) {
-      mutationProductRating.mutate(productDetails?.name, {
-        onSuccess: (data) => {
-          const count = Math.ceil(
-            data.data.map((item) => item.rating).reduce((sum, current) => sum + current, 0) / data.data.length
-          )
-          if (productDetails?.rating !== count) {
-            const { _id, ...data } = productDetails
-            console.log(_id, productDetails)
-            const newData = { ...data, rating: count }
-            mutationUpdateProduct.mutate({ id: _id, data: newData })
+      let name = productDetails?.name
+      let page = paginate.page
+      let limit = paginate.limit
+      mutationProductRating.mutate(
+        { name, page, limit },
+        {
+          onSuccess: (data) => {
+            const count = Math.ceil(
+              data.data.map((item) => item.rating).reduce((sum, current) => sum + current, 0) / data.data.length
+            )
+            if (productDetails?.rating !== count) {
+              const { _id, ...data } = productDetails
+              console.log(_id, productDetails)
+              const newData = { ...data, rating: count }
+              mutationUpdateProduct.mutate({ id: _id, data: newData })
+            }
           }
         }
-      })
+      )
     }
   }, [productDetails, isSuccess, isSuccessDelete])
+  useEffect(() => {
+    if (isOpenModalUpdateInfo) {
+      setStateUserDetails({
+        ...stateUserDetails,
+        name: user?.name,
+        city: user?.city,
+        phone: user?.phone,
+        address: user?.address
+      })
+    }
+  }, [isOpenModalUpdateInfo])
+  useEffect(() => {
+    form.setFieldsValue(stateUserDetails)
+  }, [form, stateUserDetails])
 
   const handleAddOrderProduct = () => {
     if (!user?.id) {
@@ -161,7 +205,7 @@ function ProductDetailComponent({ idProduct }) {
       if (line?.startsWith('##')) {
         // Nếu dòng bắt đầu bằng `##`, trả về nội dung in đậm
         return (
-          <div key={index} style={{ display: 'flex', justifyContent: 'center', fontSize: '2rem', color: '#fff' }}>
+          <div key={index} style={{ display: 'flex', justifyContent: 'center', fontSize: '2rem', color: '#FFD700' }}>
             <h3 style={{ display: 'block', marginBottom: '8px' }}>{line.replace('##', '')}</h3>
           </div>
         )
@@ -210,11 +254,69 @@ function ProductDetailComponent({ idProduct }) {
       return updatedState
     })
   }
+  const handleOnChangeDetails = useCallback(
+    debounce((e) => {
+      setStateUserDetails((prevState) => ({
+        ...prevState,
+        [e.target.name]: e.target.value
+      }))
+    }, 500),
+    [] // Delay 500ms
+  )
+  const handleUpdateInfoUser = () => {
+    const { name, address, city, phone } = stateUserDetails
+    if (name && address && city && phone) {
+      mutationUpdate.mutate(
+        { id: user?.id, token: user?.access_token, data: { ...stateUserDetails } },
+        {
+          onSuccess: () => {
+            dispatch(updateUser({ name, address, city, phone }))
+            setIsOpenModalUpdateInfo(false)
+            window.location.reload()
+          }
+        }
+      )
+    }
+  }
+  const handleCancelUpdate = () => {
+    setStateUserDetails({
+      name: '',
+      phone: '',
+      address: '',
+      city: ''
+    })
+    setIsOpenModalUpdateInfo(false)
+  }
   const handleDelete = (id) => {
     mutationDeleteRating.mutate(id)
   }
   const onFinishFailed = () => {}
-  console.log(dataProductRating)
+  const handleChangeAddress = () => {
+    setIsOpenModalUpdateInfo(true)
+  }
+
+  const fetchAllComment = async (name, page, limit) => {
+    mutationProductRating.mutate(
+      { name, page, limit },
+      {
+        onSuccess: (data) => {
+          if (data?.status === 'OK') {
+            setPaginate((prev) => ({ ...prev, total: data?.totalPage }))
+          }
+        }
+      }
+    )
+  }
+  useEffect(() => {
+    console.log('Updated paginate:', paginate)
+  }, [paginate])
+  useEffect(() => {
+    fetchAllComment(productDetails?.name, paginate.page, paginate.limit)
+  }, [paginate.page, productDetails?.name])
+  const onChangePaginate = (current, pageSize) => {
+    console.log(current, pageSize)
+    setPaginate({ ...paginate, page: current - 1, limit: pageSize })
+  }
   return (
     <Loading isLoading={isPending || isFetching || isPendingDelete}>
       <Row style={{ padding: '16px', backgroundColor: '#333' }}>
@@ -249,8 +351,14 @@ function ProductDetailComponent({ idProduct }) {
 
           <WrapperAddressProduct>
             <span style={{ color: '#fff' }}>Giao đến </span>
-            <span className="address">{user.address}</span> -<span className="change_address">Đổi địa chỉ</span>
+            <span style={{ color: 'blue' }}>{user.address}</span>-
+            <span onClick={handleChangeAddress} className="change_address" style={{ cursor: 'pointer' }}>
+              Đổi địa chỉ
+            </span>
           </WrapperAddressProduct>
+          <div>
+            <LikeButtonComponent dataHref={'https://developers.facebook.com/docs/plugins/'} />
+          </div>
           <div style={{ margin: '10px 0 20px' }}>
             <div style={{ marginBottom: '6px', color: '#fff' }}>Số lượng</div>
             <WrapperQuantityProduct>
@@ -298,20 +406,24 @@ function ProductDetailComponent({ idProduct }) {
             />
           </div>
         </Col>
-        <div style={{ padding: '16px', backgroundColor: '#333' }}>
-          <div style={{ color: 'red', fontSize: '3rem' }}>Thông tin mô tả</div>
-          {isPending || isFetching ? (
-            <p style={{ fontSize: '2rem', color: '#999' }}>Đang tải thông tin mô tả...</p>
-          ) : (
-            parseDescription(productDetails?.description)
-          )}
+        <div style={{ marginTop: '50px', padding: '16px', backgroundColor: '#3A3A3A', width: '100%' }}>
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', color: '#E57373', fontSize: '3rem' }}>
+            <h3>Thông tin mô tả</h3>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'start', color: '#000' }}>
+            {isPending || isFetching ? (
+              <p style={{ fontSize: '2rem', color: '#000' }}>Đang tải thông tin mô tả...</p>
+            ) : (
+              parseDescription(productDetails?.description)
+            )}
+          </div>
         </div>
-        <ReviewFormContainer>
-          <h2 style={{ color: 'white' }}>Đánh giá của bạn</h2>
+        <div style={{ width: '100%', backgroundColor: '#3A3A3A', paddingTop: '100px' }}>
+          <h2 style={{ color: '#FFD700' }}>Đánh giá của bạn</h2>
           <Form
             name="basic"
             labelCol={{
-              span: 4
+              span: 2.5
             }}
             wrapperCol={{
               span: 22
@@ -324,7 +436,7 @@ function ProductDetailComponent({ idProduct }) {
             autoComplete="on"
             form={form}
           >
-            <Form.Item label={<span style={{ color: 'white' }}>Đánh giá chất lượng</span>} name="rating">
+            <Form.Item label={<span style={{ color: '#FFDD99' }}>Đánh giá chất lượng</span>} name="rating">
               <Select
                 style={{
                   width: 120,
@@ -358,7 +470,7 @@ function ProductDetailComponent({ idProduct }) {
                 ]}
               />
             </Form.Item>
-            <Form.Item label={<span style={{ color: 'white' }}>Bình luận</span>} name="comment">
+            <Form.Item label={<span style={{ color: '#FFDD99' }}>Bình luận</span>} name="comment">
               <TextArea
                 name="comment"
                 style={{ height: '200px', border: '2px solid #000' }}
@@ -368,12 +480,12 @@ function ProductDetailComponent({ idProduct }) {
             </Form.Item>
             <Form.Item
               wrapperCol={{
-                offset: 4,
+                offset: 21,
                 span: 16
               }}
             >
               <Button
-                style={{ padding: '20px', backgroundColor: 'rgb(255, 57, 69)', fontWeight: 'bold' }}
+                style={{ padding: '20px 43px', backgroundColor: 'rgb(255, 57, 69)', fontWeight: 'bold' }}
                 type="primary"
                 htmlType="submit"
               >
@@ -381,14 +493,13 @@ function ProductDetailComponent({ idProduct }) {
               </Button>
             </Form.Item>
           </Form>
-        </ReviewFormContainer>
+        </div>
         <div style={{ width: '100%', borderTop: '1px solid #ccc' }}></div>
-        <ReviewListContainer>
-          <h2>Đánh giá của sản phẩm</h2>
+        <div style={{ width: '100%' }}>
+          <h2 style={{ color: 'red', paddingTop: '100px' }}>Đánh giá của sản phẩm</h2>
           {dataProductRating?.data?.length > 0 ? (
-            <ul>
+            <ul style={{ padding: 0, margin: 0 }}>
               {dataProductRating?.data?.map((review, index) => {
-                console.log(review.comment)
                 return (
                   <ReviewItem key={index}>
                     <div>
@@ -407,14 +518,96 @@ function ProductDetailComponent({ idProduct }) {
                   </ReviewItem>
                 )
               })}
+              <Pagination
+                current={paginate?.page + 1}
+                pageSize={10}
+                defaultCurrent={1}
+                total={paginate?.total * paginate?.limit}
+                onChange={onChangePaginate}
+              />
             </ul>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <p style={{ fontSize: '2rem', color: 'red' }}>No reviews yet. Be the first to leave a review!</p>
             </div>
           )}
-        </ReviewListContainer>
+        </div>
       </Row>
+      <ModalComponent
+        title="Cập nhập thông tin giao hàng"
+        onOk={handleUpdateInfoUser}
+        open={isOpenModalUpdateInfo}
+        onCancel={handleCancelUpdate}
+      >
+        <Loading isLoading={isLoadingUpdate}>
+          <Form
+            name="basic"
+            labelCol={{
+              span: 8
+            }}
+            wrapperCol={{
+              span: 18
+            }}
+            style={{
+              maxWidth: 1200
+            }}
+            // onFinish={onUpdateUser}
+            // onFinishFailed={onFinishFailedDetail}
+            autoComplete="off"
+            form={form}
+          >
+            <Form.Item
+              label="Name"
+              name="name"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your name!'
+                }
+              ]}
+            >
+              <InputComponent name="name" value={stateUserDetails.name} onChange={handleOnChangeDetails} />
+            </Form.Item>
+            <Form.Item
+              label="City"
+              name="city"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your city!'
+                }
+              ]}
+            >
+              <InputComponent name="city" value={stateUserDetails.city} onChange={handleOnChangeDetails} />
+            </Form.Item>
+            <Form.Item
+              label="Phone"
+              name="phone"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your phone!'
+                }
+              ]}
+            >
+              <InputComponent name="phone" value={stateUserDetails.phone} onChange={handleOnChangeDetails} />
+            </Form.Item>
+
+            <Form.Item
+              label="Address"
+              name="address"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your address!'
+                }
+              ]}
+            >
+              <InputComponent name="address" value={stateUserDetails.address} onChange={handleOnChangeDetails} />
+            </Form.Item>
+          </Form>
+        </Loading>
+      </ModalComponent>
     </Loading>
   )
 }

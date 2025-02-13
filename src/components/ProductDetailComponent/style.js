@@ -28,7 +28,7 @@ export const WrapperPriceTextProduct = styled.h1`
   line-height: 40px;
   font-weight: 500;
   padding: 10px;
-  background-color: #333;
+  background-color: #3a3a3a;
   color: #e01c1c;
 `
 export const WrapperAddressProduct = styled.div`

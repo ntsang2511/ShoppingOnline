@@ -4,7 +4,7 @@ function DefaultComponent({ children }) {
   return (
     <div>
       <HeaderComponent />
-      {children}
+      <div style={{ minHeight: '100vh', paddingBottom: '50px', backgroundColor: '#333' }}> {children}</div>
       <FooterComponent />
     </div>
   )

@@ -1,7 +1,10 @@
 import axios from 'axios'
 
-export const getProductRating = async (name) => {
-  const res = await axios.get(`${import.meta.env.VITE_API_URL_BACKEND}/rating/get-product-rating/${name}`)
+export const getProductRating = async (data) => {
+  console.log(data)
+  const res = await axios.get(
+    `${import.meta.env.VITE_API_URL_BACKEND}/rating/get-product-rating/${data.name}?limit=${data.limit}&page=${data.page}`
+  )
   return res.data
 }
 

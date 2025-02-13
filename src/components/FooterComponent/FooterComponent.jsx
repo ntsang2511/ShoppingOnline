@@ -3,25 +3,27 @@ function FooterComponent() {
   return (
     <div
       style={{
+        borderTop: '1px solid #fff',
+        marginTop: 'auto',
+        paddingTop: '30px',
         color: 'white',
         backgroundColor: '#333',
-        paddingTop: '2000px',
         display: 'flex',
         justifyContent: 'space-around'
       }}
     >
-      <div span={8}>
-        <h3 style={{ color: '#ff424e' }}>Thông tin liên hệ</h3>
+      <div span={8} style={{ fontSize: '1.5rem' }}>
+        <h3 style={{ color: '#ff424e', fontSize: '2rem' }}>Thông tin liên hệ</h3>
         <span style={{ fontSize: '1.7rem', fontWeight: 'bold', color: '#ff424e' }}>
           CÔNG TY PHÂN PHỐI SẢN PHẨM CAO CẤP WATCH SHOP
         </span>
         <br />
         <span>HOTLINE: 123456789</span>
         <br />
-        <span>Email: testing1234@gmail.com</span>
+        <span>Email: nts25112003@gmail.com</span>
       </div>
       <div span={8}>
-        <h3 style={{ color: '#ff424e' }}>Đơn vị vận chuyển</h3>
+        <h3 style={{ color: '#ff424e', fontSize: '2rem' }}>Đơn vị vận chuyển</h3>
 
         <div style={{ display: 'flex' }}>
           <div style={{ marginRight: '10px' }}>
@@ -41,7 +43,7 @@ function FooterComponent() {
         </div>
 
         <div>
-          <h3 style={{ color: '#ff424e' }}>Thanh toán</h3>
+          <h3 style={{ color: '#ff424e', fontSize: '2rem' }}>Thanh toán</h3>
           <div style={{ display: 'flex' }}>
             <div style={{ marginRight: '10px' }}>
               <img
@@ -54,7 +56,7 @@ function FooterComponent() {
         </div>
       </div>
       <div span={8}>
-        <h3 style={{ color: '#ff424e' }}>Theo dõi chúng tôi</h3>
+        <h3 style={{ color: '#ff424e', fontSize: '2rem' }}>Theo dõi chúng tôi</h3>
         <div style={{ display: 'flex' }}>
           <div style={{ marginRight: '20px' }}>
             <FacebookFilled style={{ fontSize: '5rem', color: '#4267b2', backgroundColor: '#E9EBEE' }} />

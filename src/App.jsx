@@ -2,8 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { routes } from './routes'
 import DefaultComponent from './components/DefaultComponent/DefaultComponent'
 import { Fragment, useEffect, useState } from 'react'
-import axios from 'axios'
-import { useQuery } from '@tanstack/react-query'
 import { isJsonString } from './utils'
 import { jwtDecode } from 'jwt-decode'
 import * as UserService from './services/UserService'
@@ -56,16 +54,6 @@ function App() {
 
     dispatch(updateUser({ ...res?.data, access_token: token }))
   }
-  // useEffect(() => {
-  //   fetchApi()
-  // }, [])
-
-  // const fetchApi = async () => {
-  //   const res = await axios.get(`${import.meta.env.VITE_API_URL_BACKEND}/product/get-all`)
-  //   return res.data
-  // }
-  // const query = useQuery({ queryKey: ['todos'], queryFn: fetchApi })
-  // console.log(query)
   return (
     <div>
       <Loading isLoading={isLoading}>

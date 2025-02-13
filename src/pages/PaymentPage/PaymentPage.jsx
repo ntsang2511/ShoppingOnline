@@ -253,6 +253,7 @@ function PaymentPage() {
           onSuccess: () => {
             dispatch(updateUser({ name, address, city, phone }))
             setIsOpenModalUpdateInfo(false)
+            window.location.reload()
           }
         }
       )

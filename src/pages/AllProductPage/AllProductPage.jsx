@@ -1,7 +1,5 @@
 import { Col, Pagination, Row } from 'antd'
 import CardComponent from '../../components/CardComponent/CardComponent'
-import NavbarComponent from '../../components/NavbarComponent/NavbarComponent'
-import { WrapperNavbar } from './style'
 import * as ProductService from '../../services/ProductService'
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
@@ -40,8 +38,8 @@ function AllProductPage() {
   }
   return (
     <Loading isLoading={loading}>
-      <div style={{ padding: '0 120px', backgroundColor: '#efefef', height: '100vh' }}>
-        <Row style={{ flexWrap: 'nowrap', paddingtop: '10px' }}>
+      <div style={{ padding: '0 120px', backgroundColor: '#efefef', minHeight: '100vh' }}>
+        <Row style={{ paddingtop: '10px' }}>
           {/* <WrapperNavbar span={4}>
             <NavbarComponent />
           </WrapperNavbar> */}
@@ -81,16 +79,24 @@ function AllProductPage() {
                 })}
             </div>
           </Col>
+          <Col
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: '100px',
+              marginBottom: '100px'
+            }}
+          >
+            <Pagination
+              current={paginate?.page + 1}
+              pageSize={10}
+              defaultCurrent={1}
+              total={paginate?.total * paginate?.limit}
+              onChange={onChange}
+            />
+          </Col>
         </Row>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '170px' }}>
-          <Pagination
-            current={paginate?.page + 1}
-            pageSize={10}
-            defaultCurrent={1}
-            total={paginate?.total * paginate?.limit}
-            onChange={onChange}
-          />
-        </div>
       </div>
     </Loading>
   )

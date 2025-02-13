@@ -2,7 +2,6 @@ import axios from 'axios'
 
 export const getCart = async (userId) => {
   const res = await axios.get(`${import.meta.env.VITE_API_URL_BACKEND}/cart/get-cart/${userId}`)
-  console.log(res)
   return res.data
 }
 
@@ -16,7 +15,6 @@ export const removeItem = async (data) => {
 }
 
 export const clearCart = async (data) => {
-  console.log(data)
   const res = await axios.post(`${import.meta.env.VITE_API_URL_BACKEND}/cart/clear-cart`, data)
   return res.data
 }
