@@ -2,9 +2,10 @@ import { Upload } from 'antd'
 import styled from 'styled-components'
 
 export const WrapperHeader = styled.h1`
-  color: '#000';
-  font-size: 18px;
-  margin: 4px 0;
+  color: #ff424e;
+  font-size: 2.5rem;
+  margin: 0;
+  padding-top: 10px;
 `
 export const WrapperContentProfile = styled.div`
   display: flex;
@@ -17,8 +18,8 @@ export const WrapperContentProfile = styled.div`
   gap: 30px;
 `
 export const WrapperLabel = styled.label`
-  color: #000;
-  font-size: 12px;
+  color: #fff;
+  font-size: 1.5rem;
   line-height: 30px;
   font-weight: 600;
   width: 60px;

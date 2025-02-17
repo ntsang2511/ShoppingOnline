@@ -35,6 +35,15 @@ export const getDetailsOrder = async (id, access_token) => {
   return res.data
 }
 
+export const getAllOrderForAdmin = async (id, access_token) => {
+  const res = await axiosJWT.get(`${import.meta.env.VITE_API_URL_BACKEND}/order/get-all-ord-admin`, {
+    headers: {
+      token: `Bearer ${access_token}`
+    }
+  })
+  return res.data
+}
+
 export const deliveryCheck = async (data) => {
   const res = await axiosJWT.post(`${import.meta.env.VITE_API_URL_BACKEND}/order/delivery`, data)
   return res.data
@@ -46,6 +55,5 @@ export const cancelOrder = async (id, access_token) => {
       token: `Bearer ${access_token}`
     }
   })
-  console.log(res)
   return res.data
 }

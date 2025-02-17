@@ -1,12 +1,17 @@
 import { Menu } from 'antd'
 import { useState } from 'react'
-import { AppstoreOutlined, UserOutlined } from '@ant-design/icons'
+import { AppstoreOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons'
 import { getItem } from '../../utils'
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent'
 import AdminUser from '../../components/AdminUser/AdminUser'
 import AdminProduct from '../../components/AdminProduct/AdminProduct'
+import AdminOrder from '../../components/AdminOrder/AdminOrder'
 function AdminPage() {
-  const items = [getItem('Người dùng', 'user', <UserOutlined />), getItem('Sản phẩm', 'product', <AppstoreOutlined />)]
+  const items = [
+    getItem('Người dùng', 'user', <UserOutlined />),
+    getItem('Sản phẩm', 'product', <AppstoreOutlined />),
+    getItem('Đơn hàng', 'order', <ShoppingCartOutlined />)
+  ]
   const [keySelected, setKeySelected] = useState('')
   const renderPage = (key) => {
     switch (key) {
@@ -14,6 +19,8 @@ function AdminPage() {
         return <AdminUser />
       case 'product':
         return <AdminProduct />
+      case 'order':
+        return <AdminOrder />
       default:
         return <></>
     }

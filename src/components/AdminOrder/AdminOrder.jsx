@@ -1,42 +1,43 @@
 import { Button, Space } from 'antd'
 import { WrapperHeader } from './style'
-import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
+import { DeleteOutlined, SearchOutlined } from '@ant-design/icons'
 import TableComponent from '../TableComponent/TableComponent'
-import ModalComponent from '../ModalComponent/ModalComponent'
-import Loading from '../LoadingComponent/Loading'
 import InputComponent from '../InputComponent/InputComponent'
 import { useEffect, useRef, useState } from 'react'
-import { error, success } from '../Message/Message'
 import { useQuery } from '@tanstack/react-query'
 import { useSelector } from 'react-redux'
-import { useMutationHook } from '../../hooks/useMutationHook'
-import * as UserService from '../../services/UserService'
-import { useNavigate } from 'react-router-dom'
+import * as OrderService from '../../services/OrderService'
+import LineChartComponent from '../ChartComponent/LineChartComponent'
+import ModalComponent from '../ModalComponent/ModalComponent'
+import { error, success } from '../Message/Message'
 
-function AdminUser() {
+import Loading from '../LoadingComponent/Loading'
+import { useMutationHook } from '../../hooks/useMutationHook'
+
+function AdminOrder() {
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
-  const navigate = useNavigate()
   const [searchText, setSearchText] = useState('')
   // const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
-
-  const user = useSelector((state) => state?.user)
   const [rowSelected, setRowSelected] = useState('')
-
-  const mutationDelete = useMutationHook((data) => {
-    const { id, token } = data
-    const res = UserService.deleteUser(id, token)
-    return res
-  })
-  const mutationDeleteMany = useMutationHook((data) => {
-    const { token, ...ids } = data
-    const res = UserService.deleteManyUser(ids, token)
-    return res
-  })
-  const getAllUser = async () => {
-    const res = await UserService.getAllUser()
+  const user = useSelector((state) => state?.user)
+  const getAllOrder = async () => {
+    const res = await OrderService.getAllOrderForAdmin(user?.access_token)
     return res
   }
+
+  const queryOrder = useQuery({
+    queryKey: ['orders'],
+    queryFn: getAllOrder
+  })
+  const { isPending: isLoading, data: orders } = queryOrder
+  const mutationDelete = useMutationHook((data) => {
+    console.log(data)
+    const { id, token } = data
+    const res = OrderService.cancelOrder(id, token)
+    return res
+  })
+
   const {
     data: deletedData,
     isPending: isLoadingDelete,
@@ -44,52 +45,36 @@ function AdminUser() {
     isError: isErrorDeleted
   } = mutationDelete
 
-  const { data: deletedManyData, isSuccess: isSuccessDeletedMany, isError: isErrorDeletedMany } = mutationDeleteMany
-
-  const queryUser = useQuery({
-    queryKey: ['user'],
-    queryFn: getAllUser
-  })
-  const { isPending: isLoading, data: users } = queryUser
-
   const handleDelete = () => {
     setIsModalOpenDelete(true)
   }
+
   const handleCancelDelete = () => {
     setIsModalOpenDelete(false)
   }
-
-  const handleDeleteUser = () => {
+  useEffect(() => {
+    if (isSuccessDeleted && deletedData?.status === 'OK') {
+      success()
+      handleCancelDelete()
+    } else if (isErrorDeleted) {
+      error()
+    }
+  }, [isSuccessDeleted])
+  const handleDeleteOrder = () => {
     mutationDelete.mutate(
       { id: rowSelected, token: user?.access_token },
       {
         onSettled: () => {
-          queryUser.refetch()
+          queryOrder.refetch()
         }
       }
     )
   }
-  const handleDeleteManyUsers = (ids) => {
-    mutationDeleteMany.mutate(
-      { id: ids, token: user?.access_token },
-      {
-        onSettled: () => {
-          queryUser.refetch()
-        }
-      }
-    )
-  }
+
   const renderAction = (record) => {
     return (
       <div>
         <DeleteOutlined style={{ color: 'red', fontSize: '30px', cursor: 'pointer' }} onClick={handleDelete} />
-        <EditOutlined
-          style={{ color: 'orange', fontSize: '30px', cursor: 'pointer' }}
-          onClick={() => {
-            console.log(record._id)
-            navigate(`/users/edit/${record._id}`)
-          }}
-        />
       </div>
     )
   }
@@ -169,62 +154,28 @@ function AdminUser() {
         }
       }
     }
+    // render: (text) =>
+    //   searchedColumn === dataIndex ? (
+    //     <Highlighter
+    //       highlightStyle={{
+    //         backgroundColor: '#ffc069',
+    //         padding: 0
+    //       }}
+    //       searchWords={[searchText]}
+    //       autoEscape
+    //       textToHighlight={text ? text.toString() : ''}
+    //     />
+    //   ) : (
+    //     text
+    //   )
   })
 
   const columns = [
     {
-      title: 'Avatar',
-      dataIndex: 'avatar',
-      render: (img) => {
-        return (
-          <img
-            src={img}
-            style={{
-              height: '60px',
-              width: '60px',
-              borderRadius: '50%',
-              objectFit: 'cover'
-            }}
-            alt="user image"
-          />
-        )
-      }
-    },
-    {
-      title: 'Name',
+      title: 'User name',
       dataIndex: 'name',
       sorter: (a, b) => a.name.length - b.name.length,
       ...getColumnSearchProps('name')
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      sorter: (a, b) => a.email.length - b.email.length,
-      ...getColumnSearchProps('email')
-    },
-    {
-      title: 'Role',
-      dataIndex: 'isAdmin',
-      filters: [
-        {
-          text: 'Admin',
-          value: 'true'
-        },
-        {
-          text: 'User',
-          value: 'false'
-        }
-      ],
-      onFilter: (value, record) => {
-        if (value === 'true') {
-          return record.isAdmin == true
-        } else if (value === 'false') {
-          return record.isAdmin == false
-        }
-      },
-      render: (isAd) => {
-        return isAd === true ? <div>Admin</div> : <div>User</div>
-      }
     },
     {
       title: 'Phone number',
@@ -239,16 +190,53 @@ function AdminUser() {
       ...getColumnSearchProps('address')
     },
     {
+      title: 'City',
+      dataIndex: 'city',
+      sorter: (a, b) => a.city.length - b.city.length,
+      ...getColumnSearchProps('city')
+    },
+    {
+      title: 'Order Items',
+      dataIndex: 'orderItems',
+      render: (items) => (
+        <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
+          {items.map((item, index) => (
+            <li key={index}>
+              <span style={{ color: '#FF5733', fontWeight: 'bold' }}>{item.name}</span> - {item.amount}
+            </li>
+          ))}
+        </ul>
+      )
+    },
+    {
+      title: 'Total price',
+      dataIndex: 'totalPrice',
+      sorter: (a, b) => a.totalPrice - b.totalPrice,
+      ...getColumnSearchProps('totalPrice')
+    },
+    {
+      title: 'Payment method',
+      dataIndex: 'paymentMethod',
+      sorter: (a, b) => a.paymentMethod.length - b.paymentMethod.length,
+      ...getColumnSearchProps('paymentMethod')
+    },
+    {
       title: 'Created Date',
       dataIndex: 'createdAt',
       sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       ...getColumnSearchProps('createdAt')
     },
     {
-      title: 'Updated Date',
-      dataIndex: 'updatedAt',
-      sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
-      ...getColumnSearchProps('updatedAt')
+      title: 'Paid',
+      dataIndex: 'isPaid',
+      sorter: (a, b) => a.isPaid - b.isPaid,
+      ...getColumnSearchProps('isPaid')
+    },
+    {
+      title: 'Delivery Date',
+      dataIndex: 'deliveredAt',
+      sorter: (a, b) => new Date(a.deliveredAt) - new Date(b.deliveredAt),
+      ...getColumnSearchProps('deliveredAt')
     },
     {
       title: 'Action',
@@ -260,45 +248,30 @@ function AdminUser() {
     const date = new Date(isoDate)
     return date.toLocaleString('vi-VN') // Sử dụng "vi-VN" cho định dạng Việt Nam
   }
-  const dataTable = users?.data.map((user) => {
+  const dataTable = orders?.data?.map((order) => {
+    const filteredData = order.orderItems.map(({ name, amount }) => ({ name, amount }))
     return {
-      ...user,
-      createdAt: formatDate(user.createdAt),
-      updatedAt: formatDate(user.updatedAt),
-      key: user._id
+      ...order,
+      name: order?.shippingAddress.fullName,
+      createdAt: formatDate(order.createdAt),
+      deliveredAt: order.deliveredAt ? formatDate(order.deliveredAt) : 'Chưa giao hàng',
+      isPaid: order.isPaid === true ? 'Đã thanh toán' : 'Chưa thanh toán',
+      orderItems: filteredData,
+      totalPrice: order?.totalPrice,
+      paymentMethod: order?.paymentMethod,
+      phone: order?.shippingAddress?.phone,
+      address: order?.shippingAddress?.address,
+      city: order?.shippingAddress?.city,
+      key: order._id
     }
   })
 
-  useEffect(() => {
-    if (isSuccessDeletedMany && deletedManyData?.status === 'OK') {
-      success()
-    } else if (isErrorDeletedMany) {
-      error()
-    }
-  }, [isSuccessDeletedMany])
-  useEffect(() => {
-    if (isSuccessDeleted && deletedData?.status === 'OK') {
-      success()
-      handleCancelDelete()
-    } else if (isErrorDeleted) {
-      error()
-    }
-  }, [isSuccessDeleted])
-
-  // (e) => {
-  //   setStateUserDetails({
-  //     ...stateUserDetails,
-  //     [e.target.name]: e.target.value
-  //   })
-  // }
-
   return (
     <div>
-      <WrapperHeader>Quản lý người dùng</WrapperHeader>
+      <WrapperHeader>Quản lý đơn hàng</WrapperHeader>
 
       <div style={{ marginTop: '20px' }}>
         <TableComponent
-          handleDeleteMany={handleDeleteManyUsers}
           columns={columns}
           data={dataTable}
           isLoading={isLoading}
@@ -311,10 +284,13 @@ function AdminUser() {
           }}
         />
       </div>
+      <div style={{ height: '500px', width: '100%' }}>
+        {orders?.data ? <LineChartComponent data={orders?.data} /> : <p>Chưa có dữ liệu để hiển thị biểu đồ</p>}
+      </div>
 
       <ModalComponent
         title="Xóa người dùng"
-        onOk={handleDeleteUser}
+        onOk={handleDeleteOrder}
         open={isModalOpenDelete}
         onCancel={handleCancelDelete}
       >
@@ -326,4 +302,4 @@ function AdminUser() {
   )
 }
 
-export default AdminUser
+export default AdminOrder

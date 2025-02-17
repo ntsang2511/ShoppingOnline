@@ -108,7 +108,7 @@ function ProfilePage() {
                 padding: '4px 6px 6px'
               }}
               textButton="Cập nhật"
-              styleTextButton={{ color: 'rgb(26, 148, 255)', fontSize: '15px', fontWeight: 700 }}
+              styleTextButton={{ color: '#ff424e', fontSize: '15px', fontWeight: 700 }}
             />
           </WrapperInput>
           <WrapperInput>
@@ -130,7 +130,7 @@ function ProfilePage() {
                 padding: '4px 6px 6px'
               }}
               textButton="Cập nhật"
-              styleTextButton={{ color: 'rgb(26, 148, 255)', fontSize: '15px', fontWeight: 700 }}
+              styleTextButton={{ color: '#ff424e', fontSize: '15px', fontWeight: 700 }}
             />
           </WrapperInput>
           <WrapperInput>
@@ -152,7 +152,7 @@ function ProfilePage() {
                 padding: '4px 6px 6px'
               }}
               textButton="Cập nhật"
-              styleTextButton={{ color: 'rgb(26, 148, 255)', fontSize: '15px', fontWeight: 700 }}
+              styleTextButton={{ color: '#ff424e', fontSize: '15px', fontWeight: 700 }}
             />
           </WrapperInput>
           <WrapperInput>
@@ -174,7 +174,7 @@ function ProfilePage() {
                 padding: '4px 6px 6px'
               }}
               textButton="Cập nhật"
-              styleTextButton={{ color: 'rgb(26, 148, 255)', fontSize: '15px', fontWeight: 700 }}
+              styleTextButton={{ color: '#ff424e', fontSize: '15px', fontWeight: 700 }}
             />
           </WrapperInput>
           <WrapperInput>
@@ -204,7 +204,7 @@ function ProfilePage() {
                 padding: '4px 6px 6px'
               }}
               textButton="Cập nhật"
-              styleTextButton={{ color: 'rgb(26, 148, 255)', fontSize: '15px', fontWeight: 700 }}
+              styleTextButton={{ color: '#ff424e', fontSize: '15px', fontWeight: 700 }}
             />
           </WrapperInput>
         </WrapperContentProfile>

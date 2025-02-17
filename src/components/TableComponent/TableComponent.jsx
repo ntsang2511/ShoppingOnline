@@ -25,21 +25,10 @@ function TableComponent({
   const handleDeleteAll = () => {
     handleDeleteMany(rowSelectedKey)
   }
-  // const exportExcel = () => {
-  //   const excel = new Excel()
-  //   excel
-  //     .addSheet('test')
-  //     .addColumns(columns)
-  //     .addDataSource(data, {
-  //       str2Percent: true
-  //     })
-  //     .saveAs('Excel.xlsx')
-  // }
   const exportExcel = () => {
-    // Tạo phiên bản Excel
     const excel = new Excel()
 
-    // Chuẩn bị cột: Lọc bỏ các cột không cần xuất (như Action)
+    // Lọc các cột cần xuất
     const exportableColumns = columns
       .filter(
         (col) => col.dataIndex && col.dataIndex !== 'action' && col.dataIndex !== 'image' && col.dataIndex !== 'avatar'
@@ -49,13 +38,16 @@ function TableComponent({
         dataIndex: col.dataIndex
       }))
 
-    // Chuẩn bị dữ liệu: Chuyển đổi nếu có render
+    // Chuyển đổi dữ liệu trước khi xuất
     const exportableData = data.map((row) => {
       const newRow = {}
       exportableColumns.forEach((col) => {
-        // Nếu cột có hàm render (ví dụ cột image), lấy giá trị từ dataIndex
-        if (col.dataIndex === 'image') {
-          newRow[col.dataIndex] = row[col.dataIndex] // Lấy link ảnh gốc
+        if (Array.isArray(row[col.dataIndex])) {
+          // Nếu giá trị là mảng, chuyển thành chuỗi JSON hoặc danh sách có thể đọc
+          newRow[col.dataIndex] = row[col.dataIndex].map((item) => JSON.stringify(item)).join(', ')
+        } else if (typeof row[col.dataIndex] === 'object' && row[col.dataIndex] !== null) {
+          // Nếu giá trị là object, chuyển thành chuỗi JSON
+          newRow[col.dataIndex] = JSON.stringify(row[col.dataIndex])
         } else {
           newRow[col.dataIndex] = row[col.dataIndex]
         }
@@ -63,14 +55,14 @@ function TableComponent({
       return newRow
     })
 
-    // Tạo file Excel
+    // Xuất file Excel
     excel
-      .addSheet('Table Data') // Tên sheet
-      .addColumns(exportableColumns) // Các cột
+      .addSheet('Table Data')
+      .addColumns(exportableColumns)
       .addDataSource(exportableData, {
         str2Percent: true
       })
-      .saveAs('TableData.xlsx') // Tên file xuất
+      .saveAs('TableData.xlsx')
   }
 
   return (
