@@ -16,9 +16,20 @@ Hệ thống quản lý cửa hàng đồng hồ trực tuyến, hỗ trợ bán
 
 
 ## Cài đặt
+- Tải về máy
+git clone https://github.com/ntsang2511/ShoppingOnline.git
 
-[git clone ](https://github.com/ntsang2511/ShoppingOnline.git)
-Currently, two official plugins are available:
+- Truy cập vào https://github.com/ntsang2511/ShoppingOnlineBackEnd và làm theo các bước hướng dẫn
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Cài đặt dependencies:
+npm install
+
+- Chạy ứng dụng:
+npm run dev
+
+## Công nghệ sử dụng
+ReactJS,Ant Design, reduxjs, tanstack, axios, lodash, jwt-decode,...
+
+## Thông tin liên hệ
+- Email: tansang25112003@gmail.com
+- GitHub: https://github.com/ntsang2511
