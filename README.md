@@ -15,7 +15,7 @@ An online watch store management system that supports sales, inventory managemen
 - Shipping System: Manages orders and supports logistics partners in processing deliveries, ensuring fast and efficient product shipments to customers.
 
 
-## Cài đặt
+## Installation
 - Download the project:
 git clone https://github.com/ntsang2511/ShoppingOnline.git
 
