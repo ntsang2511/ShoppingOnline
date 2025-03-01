@@ -1,35 +1,35 @@
 # Online Watch Shop Web
 
-## Mô tả
-Hệ thống quản lý cửa hàng đồng hồ trực tuyến, hỗ trợ bán hàng, quản lý kho, đơn hàng, và phân tích dữ liệu.
+## Description
+An online watch store management system that supports sales, inventory management, order processing, and data analysis.
 
-## Tính năng chính
-- Hệ thống đăng nhập và đăng ký tài khoản: Người dùng có thể tạo tài khoản mới hoặc đăng nhập vào hệ thống để sử dụng các chức năng của nền tảng. Quản trị viên có quyền quản lý sản phẩm, tài khoản người dùng, đơn hàng và theo dõi doanh thu hàng ngày.
+## Key Features
+- User Authentication System: Users can create new accounts or log into the system to access platform features. Administrators have the authority to manage products, user accounts, orders, and monitor daily revenue.
 
-- Chức năng mua sắm trực tuyến: Người dùng có thể duyệt danh sách sản phẩm, thêm sản phẩm vào giỏ hàng, lựa chọn phương thức thanh toán phù hợp và hoàn tất quá trình mua sắm một cách thuận tiện.
+- Online Shopping Functionality: Users can browse product listings, add items to their cart, select a suitable payment method, and complete their purchases conveniently.
 
-- Tìm kiếm và bộ lọc nâng cao: Hệ thống hỗ trợ tìm kiếm sản phẩm theo tên và bộ lọc theo danh mục, giúp người dùng dễ dàng tìm thấy sản phẩm mong muốn.
+- Advanced Search and Filtering: The system supports product searches by name and category filters, helping users quickly find their desired products.
 
-- Quản lý thông tin cá nhân: Người dùng có thể chỉnh sửa thông tin tài khoản cá nhân, bao gồm tên, địa chỉ, số điện thoại và các thông tin quan trọng khác.
+- Personal Information Management: Users can edit their account details, including name, address, phone number, and other essential information.
 
-- Hệ thống giao hàng: Quản lý đơn hàng và hỗ trợ các đơn vị vận chuyển trong việc xử lý giao hàng, đảm bảo hàng hóa đến tay khách hàng một cách nhanh chóng và hiệu quả.
+- Shipping System: Manages orders and supports logistics partners in processing deliveries, ensuring fast and efficient product shipments to customers.
 
 
 ## Cài đặt
-- Tải về máy
+- Download the project:
 git clone https://github.com/ntsang2511/ShoppingOnline.git
 
-- Truy cập vào https://github.com/ntsang2511/ShoppingOnlineBackEnd và làm theo các bước hướng dẫn
+- Visit https://github.com/ntsang2511/ShoppingOnlineBackEnd and follow the setup instructions.
 
-- Cài đặt dependencies:
+- Install dependencies:
 npm install
 
-- Chạy ứng dụng:
+- Run the applications:
 npm run dev
 
-## Công nghệ sử dụng
+## Technologies Used
 ReactJS,Ant Design, reduxjs, tanstack, axios, lodash, jwt-decode,...
 
-## Thông tin liên hệ
+## Contact Information
 - Email: tansang25112003@gmail.com
 - GitHub: https://github.com/ntsang2511
