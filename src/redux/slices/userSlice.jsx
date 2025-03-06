@@ -10,7 +10,8 @@ const initialState = {
   id: '',
   isAdmin: false,
   isShipper: false,
-  city: ''
+  city: '',
+  refreshToken: ''
 }
 
 export const userSlice = createSlice({
