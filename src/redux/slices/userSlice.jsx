@@ -28,7 +28,8 @@ export const userSlice = createSlice({
         _id = '',
         city = '',
         isAdmin = false,
-        isShipper = false
+        isShipper = false,
+        refreshToken = ''
       } = action.payload
       state.name = name
       state.email = email
@@ -40,8 +41,9 @@ export const userSlice = createSlice({
       state.isAdmin = isAdmin
       state.isShipper = isShipper
       state.city = city
+      state.refreshToken = refreshToken
     },
-    resetUser: (state, action) => {
+    resetUser: (state) => {
       state.name = ''
       state.email = ''
       state.phone = ''
@@ -51,6 +53,7 @@ export const userSlice = createSlice({
       state.city = ''
       state.isAdmin = false
       state.isShipper = false
+      state.refreshToken = ''
     }
   }
 })
