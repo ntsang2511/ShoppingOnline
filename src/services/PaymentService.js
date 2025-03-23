@@ -10,8 +10,6 @@ export const createZaloPayOrder = async (orderInfo) => {
       items: orderInfo.items,
       user: orderInfo.user
     })
-    console.log(response)
-    console.log(response.data)
     return response.data
   } catch (error) {
     console.error('Lỗi khi gửi yêu cầu thanh toán ZaloPay:', error)
