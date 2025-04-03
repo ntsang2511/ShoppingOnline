@@ -1,24 +1,24 @@
 import axios from 'axios'
+import { API_ROOT } from '../utils/constants'
 
 export const getProductRating = async (data) => {
-  console.log(data)
   const res = await axios.get(
-    `${import.meta.env.VITE_API_URL_BACKEND}/rating/get-product-rating/${data.name}?limit=${data.limit}&page=${data.page}`
+    `${API_ROOT}/rating/get-product-rating/${data.name}?limit=${data.limit}&page=${data.page}`
   )
   return res.data
 }
 
 export const createProductRating = async (data) => {
   console.log(data)
-  const res = await axios.post(`${import.meta.env.VITE_API_URL_BACKEND}/rating/create`, data)
+  const res = await axios.post(`${API_ROOT}/rating/create`, data)
   return res.data
 }
 export const editProductRating = async (data) => {
-  const res = await axios.put(`${import.meta.env.VITE_API_URL_BACKEND}/rating/update`, data)
+  const res = await axios.put(`${API_ROOT}/rating/update`, data)
   return res.data
 }
 
 export const deleteproductRating = async (id) => {
-  const res = await axios.delete(`${import.meta.env.VITE_API_URL_BACKEND}/rating/delete/${id}`)
+  const res = await axios.delete(`${API_ROOT}/rating/delete/${id}`)
   return res.data
 }

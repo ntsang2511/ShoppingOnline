@@ -1,6 +1,7 @@
 import { axiosJWT } from './UserService'
+import { API_ROOT } from '../utils/constants'
 export const createOrder = async (data, access_token) => {
-  const res = await axiosJWT.post(`${import.meta.env.VITE_API_URL_BACKEND}/order/create`, data, {
+  const res = await axiosJWT.post(`${API_ROOT}/order/create`, data, {
     headers: {
       token: `Bearer ${access_token}`
     }
@@ -9,7 +10,7 @@ export const createOrder = async (data, access_token) => {
 }
 
 export const getOrderByUserId = async (id, access_token) => {
-  const res = await axiosJWT.get(`${import.meta.env.VITE_API_URL_BACKEND}/order/get-all-orders/${id}`, {
+  const res = await axiosJWT.get(`${API_ROOT}/order/get-all-orders/${id}`, {
     headers: {
       token: `Bearer ${access_token}`
     }
@@ -17,17 +18,17 @@ export const getOrderByUserId = async (id, access_token) => {
   return res.data
 }
 export const getAllOrderShipper = async () => {
-  const res = await axiosJWT.get(`${import.meta.env.VITE_API_URL_BACKEND}/order/get-ship-order`)
+  const res = await axiosJWT.get(`${API_ROOT}/order/get-ship-order`)
   return res.data
 }
 
 export const getShippedOrder = async (userid) => {
-  const res = await axiosJWT.get(`${import.meta.env.VITE_API_URL_BACKEND}/order/get-shipped-order/${userid}`)
+  const res = await axiosJWT.get(`${API_ROOT}/order/get-shipped-order/${userid}`)
   return res.data
 }
 
 export const getDetailsOrder = async (id, access_token) => {
-  const res = await axiosJWT.get(`${import.meta.env.VITE_API_URL_BACKEND}/order/get-details-orders/${id}`, {
+  const res = await axiosJWT.get(`${API_ROOT}/order/get-details-orders/${id}`, {
     headers: {
       token: `Bearer ${access_token}`
     }
@@ -36,7 +37,7 @@ export const getDetailsOrder = async (id, access_token) => {
 }
 
 export const getAllOrderForAdmin = async (id, access_token) => {
-  const res = await axiosJWT.get(`${import.meta.env.VITE_API_URL_BACKEND}/order/get-all-ord-admin`, {
+  const res = await axiosJWT.get(`${API_ROOT}/order/get-all-ord-admin`, {
     headers: {
       token: `Bearer ${access_token}`
     }
@@ -45,12 +46,12 @@ export const getAllOrderForAdmin = async (id, access_token) => {
 }
 
 export const deliveryCheck = async (data) => {
-  const res = await axiosJWT.post(`${import.meta.env.VITE_API_URL_BACKEND}/order/delivery`, data)
+  const res = await axiosJWT.post(`${API_ROOT}/order/delivery`, data)
   return res.data
 }
 
 export const cancelOrder = async (id, access_token) => {
-  const res = await axiosJWT.delete(`${import.meta.env.VITE_API_URL_BACKEND}/order/cancel-order/${id}`, {
+  const res = await axiosJWT.delete(`${API_ROOT}/order/cancel-order/${id}`, {
     headers: {
       token: `Bearer ${access_token}`
     }

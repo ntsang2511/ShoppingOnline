@@ -1,8 +1,9 @@
 import axios from 'axios'
+import { API_ROOT } from '../utils/constants'
 export const createZaloPayOrder = async (orderInfo) => {
   try {
     // Gửi yêu cầu tới backend để tạo đơn hàng ZaloPay
-    const response = await axios.post(`${import.meta.env.VITE_API_URL_BACKEND}/payment/zalopay`, {
+    const response = await axios.post(`${API_ROOT}/payment/zalopay`, {
       amount: orderInfo.totalPrice, // Tổng tiền
       bankCode: 'zalopayapp',
       orderId: orderInfo.orderId, // Mã đơn hàng
