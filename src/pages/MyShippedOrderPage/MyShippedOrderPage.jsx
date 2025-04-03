@@ -14,6 +14,7 @@ import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutationHook } from '../../hooks/useMutationHook'
 import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { error, success } from '../../components/Message/Message'
 
 function MyShippedOrderPage() {
@@ -21,16 +22,66 @@ function MyShippedOrderPage() {
   const { state } = location
   const user = useSelector((state) => state.user)
   const navigate = useNavigate()
+  const fetchGetAllShippedOrder = async () => {
+    const res = await OrderService.getShippedOrder(user?.id)
+    return res.data
+  }
+  const queryGetAllShippedOrder = useQuery(
+    {
+      queryKey: ['shippedOrders'],
+      queryFn: fetchGetAllShippedOrder,
+      enabled: !!user?.id
+    }
+    // {
+    //   enabled: state?.id && state?.token
+    // }
+  )
 
-  const mutationGetAllShippedOrder = useMutationHook((data) => {
-    const res = OrderService.getShippedOrder(data)
-    return res
-  })
-  const { data, isPending, isSuccess } = mutationGetAllShippedOrder
+  const { isPending, data } = queryGetAllShippedOrder
+  // const mutationGetAllShippedOrder = useMutationHook((data) => {
+  //   const res = OrderService.getShippedOrder(data)
+  //   return res
+  // })
+  // const { data, isPending, isSuccess } = mutationGetAllShippedOrder
+
+  // useEffect(() => {
+  //   mutationGetAllShippedOrder.mutate(user.id)
+  // }, [])
 
   useEffect(() => {
-    mutationGetAllShippedOrder.mutate(user.id)
-  }, [])
+    if (user?.id) {
+      queryGetAllShippedOrder.refetch()
+    }
+  }, [user])
+
+  console.log(data)
+
+  const mutation = useMutationHook((data) => {
+    const { id, token } = data
+    const res = OrderService.cancelOrder(id, token)
+    return res
+  })
+
+  const { isPending: isLoadingCancel, isSuccess: isSuccessCancel, isError: isErrorCancle, data: dataCancel } = mutation
+  const handleCancelOrder = (order) => {
+    mutation.mutate(
+      { id: order._id, token: state?.token },
+      {
+        onSettled: () => {
+          queryGetAllShippedOrder.refetch()
+        }
+      }
+    )
+  }
+  useEffect(() => {
+    if (isSuccessCancel && dataCancel?.status === 'OK') {
+      success('Đã xóa đơn hàng thành công')
+    } else if (isSuccessCancel && dataCancel?.status === 'ERR') {
+      error('Xóa dơn hàng thất bại')
+    } else if (isErrorCancle) {
+      error()
+    }
+  }, [isErrorCancle, isSuccessCancel])
 
   const renderProduct = (data) => {
     return data?.map((order) => {
@@ -66,13 +117,14 @@ function MyShippedOrderPage() {
     const productId = order.orderItems[0].product
     navigate(`/product-details/${productId}`)
   }
-  return data?.data?.length > 0 ? (
-    <Loading isLoading={isPending}>
+
+  return data?.length > 0 ? (
+    <Loading isLoading={isPending || isLoadingCancel}>
       <WrapperContainer>
         <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
           <h2 style={{ fontSize: '2rem', color: 'red', margin: 0, paddingTop: '20px' }}>Đơn hàng đã giao của bạn</h2>
           <WrapperListOrder>
-            {data?.data?.map((order) => {
+            {data?.map((order) => {
               return (
                 <WrapperItemOrder key={order?._id}>
                   <WrapperStatus>
@@ -99,6 +151,17 @@ function MyShippedOrderPage() {
                       </span>
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
+                      <ButtonComponent
+                        onClick={() => handleCancelOrder(order)}
+                        size={40}
+                        styleButton={{
+                          height: '36px',
+                          border: '1px solid #9255FD',
+                          borderRadius: '4px'
+                        }}
+                        textButton="Xóa đơn hàng"
+                        styleTextButton={{ color: '#9255FD', fontSize: '14px' }}
+                      ></ButtonComponent>
                       <ButtonComponent
                         onClick={() => handleRatingProduct(order)}
                         size={40}

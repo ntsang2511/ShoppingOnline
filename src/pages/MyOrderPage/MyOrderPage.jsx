@@ -38,7 +38,6 @@ function MyOrderPage() {
   )
 
   const { isPending, data } = queryOrder
-  console.log(data)
   const handleDetailsOrder = (id) => {
     navigate(`/details-order/${id}`, {
       state: {
