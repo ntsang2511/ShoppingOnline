@@ -1,6 +1,5 @@
 import * as OrderService from '../../services/OrderService'
 import Loading from '../../components/LoadingComponent/Loading'
-import { useSelector } from 'react-redux'
 import {
   WrapperContainer,
   WrapperFooterItem,
@@ -15,13 +14,10 @@ import { useLocation } from 'react-router-dom'
 import { useMutationHook } from '../../hooks/useMutationHook'
 import { useEffect } from 'react'
 import { error, success } from '../../components/Message/Message'
-import { useQueryClient } from '@tanstack/react-query'
 
 function OrderShiperPage() {
-  const queryClient = useQueryClient()
   const location = useLocation()
   const { state } = location
-  const user = useSelector((state) => state.user)
 
   const mutationCheckDelivery = useMutationHook((data) => {
     console.log(data)

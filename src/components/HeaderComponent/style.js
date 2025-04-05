@@ -6,20 +6,8 @@ export const WrapperHeader = styled(Row)`
   background-color: #000;
   align-items: center;
   gap: 16px;
-  height: 90px;
+  height: 100px;
   flex-wrap: nowrap;
-`
-
-export const WrapperTextHeader = styled.a`
-  font-size: 30px;
-  color: #fff;
-  font-weight: bold;
-  text-align: left;
-  text-transform: uppercase;
-  &:hover.css-dev-only-do-not-override-apn68: {
-    color: #fff !important;
-    background-color: #fff !important;
-  }
 `
 export const WrapperHeaderAccount = styled.div`
   display: flex;
@@ -43,5 +31,21 @@ export const WrapperContentPopUp = styled.p`
   margin: 0;
   &:hover {
     color: rgb(26, 148, 255);
+  }
+`
+export const UserImage = styled.img`
+  width: 100px;
+  height: 100px;
+
+  @media (max-width: 576px) {
+    width: 100px;
+  }
+
+  @media (max-width: 768px) {
+    width: 150px;
+  }
+
+  @media (min-width: 992px) {
+    width: 200px;
   }
 `

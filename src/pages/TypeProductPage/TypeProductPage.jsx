@@ -1,7 +1,5 @@
 import { Col, Pagination, Row } from 'antd'
 import CardComponent from '../../components/CardComponent/CardComponent'
-import NavbarComponent from '../../components/NavbarComponent/NavbarComponent'
-import { WrapperNavbar } from './style'
 import * as ProductService from '../../services/ProductService'
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'

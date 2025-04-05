@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom'
 function AdminProduct() {
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
   const navigate = useNavigate()
-  const [searchText, setSearchText] = useState('')
+  // const [searchText, setSearchText] = useState('')
   // const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
   const user = useSelector((state) => state?.user)
@@ -55,12 +55,7 @@ function AdminProduct() {
     isError: isErrorDeleted
   } = mutationDelete
 
-  const {
-    data: deletedManyData,
-    isPending: isLoadingDeleteMany,
-    isSuccess: isSuccessDeletedMany,
-    isError: isErrorDeletedMany
-  } = mutationDeleteMany
+  const { data: deletedManyData, isSuccess: isSuccessDeletedMany, isError: isErrorDeletedMany } = mutationDeleteMany
 
   const queryProduct = useQuery({
     queryKey: ['products'],
@@ -105,14 +100,11 @@ function AdminProduct() {
       </div>
     )
   }
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = (selectedKeys, confirm) => {
     confirm()
-    // setSearchText(selectedKeys[0])
-    // setSearchedColumn(dataIndex)
   }
   const handleReset = (clearFilters) => {
     clearFilters()
-    setSearchText('')
   }
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -326,9 +318,9 @@ function AdminProduct() {
           columns={columns}
           data={dataTable}
           isLoading={isLoading}
-          onRow={(record, rowIndex) => {
+          onRow={(record) => {
             return {
-              onClick: (event) => {
+              onClick: () => {
                 setRowSelected(record._id)
               }
             }

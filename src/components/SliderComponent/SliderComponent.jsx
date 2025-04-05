@@ -16,7 +16,7 @@ function SliderComponent({ arrImages }) {
   return (
     <WrapperSliderStyle {...settings}>
       {arrImages.map((image, index) => {
-        return <Image src={image} alt="slider" key={index} preview={false} width="100%" height="650px" />
+        return <Image src={image} alt="slider" key={index} preview={false} width="100%" height="100%" />
       })}
     </WrapperSliderStyle>
   )

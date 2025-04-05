@@ -27,7 +27,7 @@ function ProfilePage() {
 
     return response
   })
-  const { data, isPending, isSuccess, isError } = mutation
+  const { isPending, isSuccess, isError } = mutation
   useEffect(() => {
     setEmail(user?.email)
     setName(user?.name)

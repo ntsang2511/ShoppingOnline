@@ -16,7 +16,7 @@ import { useMutationHook } from '../../hooks/useMutationHook'
 
 function AdminOrder() {
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
-  const [searchText, setSearchText] = useState('')
+  // const [searchText, setSearchText] = useState('')
   // const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
   const [rowSelected, setRowSelected] = useState('')
@@ -71,21 +71,21 @@ function AdminOrder() {
     )
   }
 
-  const renderAction = (record) => {
+  const renderAction = () => {
     return (
       <div>
         <DeleteOutlined style={{ color: 'red', fontSize: '30px', cursor: 'pointer' }} onClick={handleDelete} />
       </div>
     )
   }
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = (selectedKeys, confirm) => {
     confirm()
     // setSearchText(selectedKeys[0])
     // setSearchedColumn(dataIndex)
   }
   const handleReset = (clearFilters) => {
     clearFilters()
-    setSearchText('')
+    // setSearchText('')
   }
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -275,9 +275,9 @@ function AdminOrder() {
           columns={columns}
           data={dataTable}
           isLoading={isLoading}
-          onRow={(record, rowIndex) => {
+          onRow={(record) => {
             return {
-              onClick: (event) => {
+              onClick: () => {
                 setRowSelected(record._id)
               }
             }

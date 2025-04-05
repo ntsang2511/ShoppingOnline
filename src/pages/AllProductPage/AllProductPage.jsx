@@ -1,7 +1,6 @@
 import { Col, Pagination, Row } from 'antd'
 import CardComponent from '../../components/CardComponent/CardComponent'
 import * as ProductService from '../../services/ProductService'
-import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Loading from '../../components/LoadingComponent/Loading'
 import { useSelector } from 'react-redux'
@@ -9,7 +8,6 @@ import { useDebounce } from '../../hooks/useDebounce'
 function AllProductPage() {
   const searchProduct = useSelector((state) => state.product?.search)
   const searchDebounce = useDebounce(searchProduct, 500)
-  const { state } = useLocation()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(false)
   const [paginate, setPaginate] = useState({

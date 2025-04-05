@@ -51,7 +51,7 @@ function CreateProductComponent() {
     const res = ProductService.createProduct({ name, price, description, rating, image, type, countInStock, discount })
     return res
   })
-  const { data, isPending, isSuccess, isError } = mutation
+  const { isPending } = mutation
   const typeProduct = useQuery({
     queryKey: ['type-product'],
     queryFn: fetchAllTypeProduct

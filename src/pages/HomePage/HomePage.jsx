@@ -16,10 +16,12 @@ import { useNavigate } from 'react-router-dom'
 function HomePage() {
   const searchProduct = useSelector((state) => state.product?.search)
   const searchDebounce = useDebounce(searchProduct, 500)
-  const [limit, setLimit] = useState(5)
+  // const [limit, setLimit] = useState(5)
+  const limit = 5
   const navigate = useNavigate()
   // const [page, setPage] = useState(5)
-  const [loading, setLoading] = useState(false)
+  // const [loading, setLoading] = useState(false)
+  const loading = false
   const [typeProduct, setTypeProduct] = useState([])
   const fetchProductAll = async (context) => {
     const limit = context?.queryKey && context?.queryKey[1]
@@ -28,7 +30,7 @@ function HomePage() {
     return res
   }
 
-  const { isPending, data, isFetching } = useQuery({
+  const { isPending, data } = useQuery({
     queryKey: ['products', limit, searchDebounce],
     queryFn: fetchProductAll,
     keepPreviousData: true,
@@ -93,7 +95,7 @@ function HomePage() {
           </div>
           <WrapperProducts>
             <ButtonComponent
-              textButton={isFetching ? 'Tải thêm' : 'Xem thêm'}
+              textButton={'Xem thêm'}
               type="outlined"
               styleButton={{
                 border: '1px solid #f9f9fd',

@@ -13,7 +13,7 @@ function TableComponent({
   const [rowSelectedKey, setRowSelectedKey] = useState([])
   // rowSelection object indicates the need for row selection
   const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
+    onChange: (selectedRowKeys) => {
       setRowSelectedKey(selectedRowKeys)
     }
     // getCheckboxProps: (record) => ({

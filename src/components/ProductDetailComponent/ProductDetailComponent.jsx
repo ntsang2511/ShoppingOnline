@@ -120,16 +120,10 @@ function ProductDetailComponent({ idProduct }) {
     }
   }
 
-  const { data, isPending: isPendingCart } = mutation
-  const { data: dataProductRating, isPending: isPendingRating } = mutationProductRating
-  const { data: dataCreateProductRating, isPending: isPendingCreateRating, isSuccess } = mutationCreateRating
+  const { data: dataProductRating } = mutationProductRating
+  const { isSuccess } = mutationCreateRating
   const { isPending: isPendingDelete, isSuccess: isSuccessDelete } = mutationDeleteRating
-  const {
-    data: updatedData,
-    isPending: isLoadingUpdate,
-    isSuccess: isSuccessUpdated,
-    isError: isErrorUpdated
-  } = mutationUpdate
+  const { isPending: isLoadingUpdate } = mutationUpdate
   useEffect(() => {
     if (productDetails?.name) {
       let name = productDetails?.name

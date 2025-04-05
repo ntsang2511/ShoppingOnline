@@ -7,6 +7,26 @@ export const WrapperCardStyle = styled(Card)`
     height: 200px;
     width: 200px;
   }
+  @media (max-width: 576px) {
+    & img {
+      height: 100px;
+      width: 100px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    & img {
+      height: 150px;
+      width: 150px;
+    }
+  }
+
+  @media (min-width: 992px) {
+    & img {
+      height: 200px;
+      width: 200px;
+    }
+  }
   border: none;
   background-color: ${(props) => (props.disabled ? '#ccc' : '#000')};
   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};

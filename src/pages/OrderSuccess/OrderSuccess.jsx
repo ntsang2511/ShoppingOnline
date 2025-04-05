@@ -3,20 +3,16 @@ import {
   WrapperInfo,
   WrapperContainer,
   WrapperValue,
-  WrapperPriceDiscount,
   WrapperOrderItem,
   WrapperCountOrder,
   WrapperInfoOrderItem
 } from './style'
-import { useSelector } from 'react-redux'
 import Loading from '../../components/LoadingComponent/Loading'
 import { useLocation } from 'react-router-dom'
 import { orderConstant } from '../../constant'
 import { convertPrice } from '../../utils'
 
 function OrderSuccess() {
-  const order = useSelector((state) => state.order)
-  const user = useSelector((state) => state.user)
   const location = useLocation()
   const { state } = location
   return (
@@ -76,8 +72,8 @@ function OrderSuccess() {
                   )
                 })}
               </WrapperInfoOrderItem>
-              <div>
-                <span style={{ color: 'rgb(255,66,28)', fontSize: '13px' }}>
+              <div style={{ marginTop: '20px' }}>
+                <span style={{ color: 'rgb(255,66,28)', fontSize: '20px' }}>
                   Tổng tiền: {convertPrice(state?.totalPrice)}
                 </span>
               </div>

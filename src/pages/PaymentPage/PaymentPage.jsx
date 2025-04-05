@@ -101,20 +101,13 @@ function PaymentPage() {
     return res
   })
 
-  const {
-    data: updatedData,
-    isPending: isLoadingUpdate,
-    isSuccess: isSuccessUpdated,
-    isError: isErrorUpdated
-  } = mutationUpdate
+  const { isPending: isLoadingUpdate } = mutationUpdate
   const { data, isPending, isSuccess, isError } = mutationAddOrder
 
   const mutationDeleteAll = useMutationHook((data) => {
     const res = CartService.clearCart(data)
     return res
   })
-
-  const { data: dataDeleteCart } = mutationDeleteAll
 
   useEffect(() => {
     if (isSuccess && data?.status === 'OK') {

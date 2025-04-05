@@ -9,19 +9,43 @@ import {
 } from './style'
 import { StarFilled } from '@ant-design/icons'
 import { convertPrice } from '../../utils'
-function CardComponent({ countInStock, description, name, image, price, rating, type, selled, discount, id }) {
+import { useEffect, useState } from 'react'
+function CardComponent({ countInStock, name, image, price, rating, selled, discount, id }) {
   const navigate = useNavigate()
+  const getResponsiveWidth = () => {
+    if (window.innerWidth <= 576) return 100
+    if (window.innerWidth <= 768) return 150
+    return 239
+  }
+
+  const getResponsiveImgSize = () => {
+    if (window.innerWidth <= 576) return 100
+    if (window.innerWidth <= 768) return 150
+    return 200
+  }
+  const [cardWidth, setCardWidth] = useState(getResponsiveWidth())
+  const [imgSize, setImgSize] = useState(getResponsiveImgSize())
+
+  useEffect(() => {
+    const handleResize = () => {
+      setCardWidth(getResponsiveWidth())
+      setImgSize(getResponsiveImgSize())
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
   const handleDetailsProduct = (id) => {
     navigate(`/product-details/${id}`)
   }
   return (
     <WrapperCardStyle
       hoverable={countInStock > 0}
-      style={{ width: '239px' }}
+      style={{ width: `${cardWidth}px` }}
       styles={{
         header: {
-          width: '200px',
-          height: '200px'
+          width: `${imgSize}px`,
+          height: `${imgSize}px`
         },
         body: {
           padding: '10px'

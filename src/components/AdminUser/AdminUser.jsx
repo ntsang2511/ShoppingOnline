@@ -16,7 +16,6 @@ import { useNavigate } from 'react-router-dom'
 function AdminUser() {
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
   const navigate = useNavigate()
-  const [searchText, setSearchText] = useState('')
   // const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
 
@@ -93,14 +92,11 @@ function AdminUser() {
       </div>
     )
   }
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = (selectedKeys, confirm) => {
     confirm()
-    // setSearchText(selectedKeys[0])
-    // setSearchedColumn(dataIndex)
   }
   const handleReset = (clearFilters) => {
     clearFilters()
-    setSearchText('')
   }
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -302,9 +298,9 @@ function AdminUser() {
           columns={columns}
           data={dataTable}
           isLoading={isLoading}
-          onRow={(record, rowIndex) => {
+          onRow={(record) => {
             return {
-              onClick: (event) => {
+              onClick: () => {
                 setRowSelected(record._id)
               }
             }

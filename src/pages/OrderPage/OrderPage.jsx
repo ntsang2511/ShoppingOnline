@@ -61,17 +61,10 @@ function OrderPage() {
     return res
   })
 
-  const mutation = useMutationHook((data) => {
-    const res = CartService.addItemCart(data)
-    return res
-  })
-
   const mutationAmount = useMutationHook((data) => {
     console.log(data)
     return CartService.updateItemAmount(data) // Giả sử API này tồn tại trong `CartService`
   })
-  const { data: dataAddCart, isPending: isPendingCart, isSuccess, isError } = mutation
-  const { data } = mutationDeleteAll
   const onChange = (e) => {
     if (listChecked.includes(e.target.value)) {
       const newListChecked = listChecked.filter((item) => {
@@ -224,12 +217,7 @@ function OrderPage() {
     const res = UserService.updateUser(id, rests.data, token)
     return res
   })
-  const {
-    data: updatedData,
-    isPending: isLoadingUpdate,
-    isSuccess: isSuccessUpdated,
-    isError: isErrorUpdated
-  } = mutationUpdate
+  const { isPending: isLoadingUpdate } = mutationUpdate
   const handleCancelUpdate = () => {
     setStateUserDetails({
       name: '',
