@@ -85,7 +85,6 @@ function AdminProduct() {
       }
     )
   }
-  console.log(rowSelected)
   const renderAction = (record) => {
     return (
       <div>
@@ -93,7 +92,6 @@ function AdminProduct() {
         <EditOutlined
           style={{ color: 'orange', fontSize: '30px', cursor: 'pointer' }}
           onClick={() => {
-            console.log(record._id)
             navigate(`/products/edit/${record._id}`) // Điều hướng trực tiếp từ record._id
           }}
         />

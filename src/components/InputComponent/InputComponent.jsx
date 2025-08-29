@@ -1,10 +1,10 @@
-import { Input } from 'antd'
+import { CustomInput } from './style'
 
 function InputComponent({ size, placeholder, backgroundColorInput, ...rests }) {
   return (
-    <Input
+    <CustomInput
       size={size}
-      style={{ backgroundColor: backgroundColorInput }}
+      backgroundColorInput={backgroundColorInput}
       placeholder={placeholder}
       variant={false}
       {...rests}

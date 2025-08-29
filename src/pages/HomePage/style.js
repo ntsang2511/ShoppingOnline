@@ -1,13 +1,12 @@
 import styled from 'styled-components'
+
 export const WrapperTypeProduct = styled.div`
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  padding: 16px 0;
   display: flex;
-  align-items: center;
-  gap: 24px;
-  justify-content: flex-start;
-  border-bottom: 1px solid red;
-  height: 44px;
-  background-color: #333333;
-  color: #fff;
+  justify-content: center;
+  background-color: #1a1a1a;
 `
 
 export const WrapperProducts = styled.div`
@@ -17,4 +16,11 @@ export const WrapperProducts = styled.div`
   justify-content: center;
   gap: 20px;
   flex-wrap: wrap;
+`
+
+export const StickyHeader = styled.div`
+  position: sticky;
+  top: 102px;
+  z-index: 900;
+  background-color: #1a1a1a;
 `

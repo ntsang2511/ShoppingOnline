@@ -85,7 +85,6 @@ function AdminUser() {
         <EditOutlined
           style={{ color: 'orange', fontSize: '30px', cursor: 'pointer' }}
           onClick={() => {
-            console.log(record._id)
             navigate(`/users/edit/${record._id}`)
           }}
         />

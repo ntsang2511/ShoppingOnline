@@ -61,7 +61,7 @@ function MyOrderPage() {
     )
   }
   const { isPending: isLoadingCancel, isSuccess: isSuccessCancel, isError: isErrorCancle, data: dataCancel } = mutation
-  console.log(isSuccessCancel, isErrorCancle, dataCancel)
+
   useEffect(() => {
     if (isSuccessCancel && dataCancel?.status === 'OK') {
       success('Đã xóa đơn hàng thành công')

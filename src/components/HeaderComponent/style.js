@@ -1,14 +1,5 @@
-import { Row } from 'antd'
 import styled from 'styled-components'
 
-export const WrapperHeader = styled(Row)`
-  padding: 10px 120px;
-  background-color: #000;
-  align-items: center;
-  gap: 16px;
-  height: 100px;
-  flex-wrap: nowrap;
-`
 export const WrapperHeaderAccount = styled.div`
   display: flex;
   align-items: center;

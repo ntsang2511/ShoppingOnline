@@ -2,14 +2,11 @@ import axios from 'axios'
 import { API_ROOT } from '../utils/constants'
 
 export const getProductRating = async (data) => {
-  const res = await axios.get(
-    `${API_ROOT}/rating/get-product-rating/${data.name}?limit=${data.limit}&page=${data.page}`
-  )
+  const res = await axios.get(`${API_ROOT}/rating/get-product-rating/${data.name}`)
   return res.data
 }
 
 export const createProductRating = async (data) => {
-  console.log(data)
   const res = await axios.post(`${API_ROOT}/rating/create`, data)
   return res.data
 }

@@ -1,11 +1,18 @@
 import { Button } from 'antd'
-function ButtonComponent({ size, styleButton, styleTextButton, textButton, ...rest }) {
+import { useState } from 'react'
+function ButtonComponent({ size, styleButton, styleTextButton, textButton, hoverStyle, ...rest }) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const buttonStyle = {
+    ...styleButton,
+    ...(isHovered && hoverStyle) // Áp dụng hoverStyle khi được hover
+  }
   return (
     <Button
-      style={{
-        ...styleButton
-      }}
+      style={buttonStyle}
       size={size}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       // icon={<SearchOutlined color={colorButton} />}
       {...rest}
     >

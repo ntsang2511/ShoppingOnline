@@ -27,7 +27,6 @@ export const getAllUser = async (access_token) => {
   return res.data
 }
 export const refreshToken = async (refreshToken) => {
-  console.log('refreshToken', refreshToken)
   const res = await axios.post(
     `${API_ROOT}/user/refresh-token`,
     {},

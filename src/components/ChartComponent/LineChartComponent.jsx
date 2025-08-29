@@ -4,8 +4,6 @@ function LineChartComponent({ data }) {
     return <p>Không có dữ liệu để hiển thị biểu đồ</p>
   }
 
-  console.log('Dữ liệu ban đầu:', data)
-
   // Bước 1: Gom tổng tiền theo ngày
   const revenueByDate = data.reduce((acc, order) => {
     const date = new Date(order.createdAt).toISOString().split('T')[0] // YYYY-MM-DD
@@ -13,15 +11,11 @@ function LineChartComponent({ data }) {
     return acc
   }, {})
 
-  console.log('Tổng tiền theo ngày:', revenueByDate)
-
   // Bước 2: Chuyển object thành mảng
   const chartData = Object.keys(revenueByDate).map((date) => ({
     date, // Định dạng ngày
     totalRevenue: revenueByDate[date] // Tổng tiền trong ngày đó
   }))
-
-  console.log('Dữ liệu chuẩn bị cho chart:', chartData)
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart

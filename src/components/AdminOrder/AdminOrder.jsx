@@ -32,7 +32,6 @@ function AdminOrder() {
   })
   const { isPending: isLoading, data: orders } = queryOrder
   const mutationDelete = useMutationHook((data) => {
-    console.log(data)
     const { id, token } = data
     const res = OrderService.cancelOrder(id, token)
     return res

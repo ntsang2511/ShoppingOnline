@@ -1,4 +1,4 @@
-import { Upload } from 'antd'
+import { Select, Upload } from 'antd'
 import styled from 'styled-components'
 
 export const WrapperUploadFile = styled(Upload)`
@@ -9,5 +9,21 @@ export const WrapperUploadFile = styled(Upload)`
   }
   & .ant-upload-list.ant-upload-list-text {
     display: none;
+  }
+`
+export const StyledSelect = styled(Select)`
+  & .ant-select-selector {
+    border: 2px solid #2e363f !important;
+    border-radius: 6px !important;
+    background: #252f33 !important;
+    color: #fff !important;
+  }
+
+  & .ant-select-arrow {
+    color: #fff !important;
+  }
+
+  & .ant-select-selection-item {
+    color: #fff !important;
   }
 `

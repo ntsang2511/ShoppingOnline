@@ -1,16 +1,27 @@
-import { Button, Form, Select } from 'antd'
+import { Button, Form, Row, Col, Card, Space, Typography } from 'antd'
 import Loading from '../LoadingComponent/Loading'
 import InputComponent from '../InputComponent/InputComponent'
-import { WrapperUploadFile } from './style'
+import { StyledSelect, WrapperUploadFile } from './style'
 import { getBase64, renderOptions } from '../../utils.js'
 import { useState } from 'react'
 import Compressor from 'compressorjs'
-import { StarFilled, UploadOutlined } from '@ant-design/icons'
+import {
+  UploadOutlined,
+  SaveOutlined,
+  CloseOutlined,
+  FileTextOutlined,
+  DollarOutlined,
+  CodeSandboxOutlined
+} from '@ant-design/icons'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import * as ProductService from '../../services/ProductService'
 import { error, success } from '../Message/Message'
 import { useMutationHook } from '../../hooks/useMutationHook.js'
-import TextArea from 'antd/es/input/TextArea.js'
+import 'react-quill/dist/quill.snow.css'
+import ReactQuill from 'react-quill'
+
+const { Title, Text } = Typography
+
 function CreateProductComponent() {
   const [form] = Form.useForm()
   const queryClient = useQueryClient()
@@ -18,20 +29,20 @@ function CreateProductComponent() {
     name: '',
     price: '',
     description: '',
-    rating: '',
+    rating: '0', // Mặc định rating là 0
     image: '',
     type: '',
     countInStock: '',
     newType: '',
     discount: ''
   })
-  const [typeSelect, setTypeSelect] = useState('')
+  const typeSelect = ''
   const resetStateProduct = () => {
     setStateProduct({
       name: '',
       price: '',
       description: '',
-      rating: '',
+      rating: '0', // Reset rating về 0
       image: '',
       type: '',
       countInStock: '',
@@ -76,15 +87,18 @@ function CreateProductComponent() {
     })
   }
   const handleOnChange = (e) => {
-    // setStateProduct({
-    //   ...stateProduct,
-    //   [e.target.name]: e.target.value
-    // })
     form.setFieldsValue({ [e.target.name]: e.target.value }) // Cập nhật giá trị trong form
     setStateProduct((prev) => ({
       ...prev,
       [e.target.name]: e.target.value
     }))
+  }
+  const handleChangeDescription = (content) => {
+    setStateProduct((prev) => ({
+      ...prev,
+      description: content
+    }))
+    form.setFieldsValue({ description: content })
   }
   const handleOnChangeAvatar = async ({ fileList }) => {
     const file = fileList[0]
@@ -108,226 +122,292 @@ function CreateProductComponent() {
       ...stateProduct,
       type: value
     })
-    console.log(stateProduct)
   }
-  const handleChangeRating = (value) => {
-    setStateProduct({
-      ...stateProduct,
-      rating: value
-    })
-  }
-  const renderStar = (rating) => {
-    return (
-      <div>
-        {rating} <StarFilled style={{ color: 'yellow' }} />
-      </div>
-    )
+
+  const modules = {
+    toolbar: [
+      [{ font: [] }, { size: [] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ align: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['link', 'image'],
+      ['clean']
+    ]
   }
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'center', color: 'red', fontSize: '1.7rem' }}>
-        <h1>Tạo sản phẩm</h1>
-      </div>
+    <div style={{ padding: '24px', background: '#1a1a1a', marginLeft: '5%', marginRight: '5%' }}>
+      <style>
+        {`
+          @media (max-width: 768px) {
+            div[style*="marginLeft: 5%"] {
+              margin-left: 2%;
+              margin-right: 2%;
+            }
+          }
+          @media (max-width: 480px) {
+            div[style*="marginLeft: 5%"] {
+              margin-left: 0;
+              margin-right: 0;
+            }
+          }
+        `}
+      </style>
       <Loading isLoading={isPending}>
-        <Form
-          name="basic"
-          labelCol={{
-            span: 6
-          }}
-          wrapperCol={{
-            span: 22
-          }}
-          style={{
-            maxWidth: 1200
-          }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="on"
-          form={form}
-        >
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[
-              {
-                required: true,
-                message: 'Please input product name!'
-              }
-            ]}
-          >
-            <InputComponent name="name" value={stateProduct.name} onChange={handleOnChange} />
-          </Form.Item>
-
-          <Form.Item
-            label="Type"
-            name="type"
-            rules={[
-              {
-                required: true,
-                message: 'Please input product type!'
-              }
-            ]}
-          >
-            <Select
-              name={typeSelect !== 'add_type' ? 'type' : ''}
-              // defaultValue="lucy"
-              value={stateProduct.type}
-              style={{ border: '2px solid #000', borderRadius: '6px' }}
-              onChange={handleChangeSelect}
-              options={renderOptions(typeProduct?.data?.data)}
-            />
-          </Form.Item>
-
-          {stateProduct.type === 'add_type' && (
-            <Form.Item
-              label="New Type"
-              name="newType"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input product type!'
-                }
-              ]}
-            >
-              <InputComponent value={stateProduct.newType} onChange={handleOnChange} name="newType" />
-            </Form.Item>
-          )}
-
-          <Form.Item
-            label="Count in stock"
-            name="countInStock"
-            rules={[
-              {
-                required: true,
-                message: 'Please input product countInStock!'
-              }
-            ]}
-          >
-            <InputComponent name="countInStock" value={stateProduct.countInStock} onChange={handleOnChange} />
-          </Form.Item>
-
-          <Form.Item
-            label="Price"
-            name="price"
-            rules={[
-              {
-                required: true,
-                message: 'Please input product price!'
-              }
-            ]}
-          >
-            <InputComponent name="price" value={stateProduct.price} onChange={handleOnChange} />
-          </Form.Item>
-          <Form.Item
-            label="Description"
-            name="description"
-            rules={[
-              {
-                required: true,
-                message: 'Please input product description!'
-              }
-            ]}
-          >
-            <TextArea
-              name="description"
-              style={{ height: '200px', border: '2px solid #000' }}
-              value={stateProduct.description}
-              onChange={handleOnChange}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Rating"
-            name="rating"
-            rules={[
-              {
-                required: true,
-                message: 'Please input product rating!'
-              }
-            ]}
-          >
-            <Select
-              style={{
-                width: 120,
-                border: '2px solid #000',
-                borderRadius: '8px'
-              }}
-              name="rating"
-              value={stateProduct.rating}
-              onChange={handleChangeRating}
-              options={[
-                {
-                  value: '1',
-                  label: renderStar(1)
-                },
-                {
-                  value: '2',
-                  label: renderStar(2)
-                },
-                {
-                  value: '3',
-                  label: renderStar(3)
-                },
-                {
-                  value: '4',
-                  label: renderStar(4)
-                },
-                {
-                  value: '5',
-                  label: renderStar(5)
-                }
-              ]}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Discount"
-            name="discount"
-            rules={[
-              {
-                required: true,
-                message: 'Please input product discount!'
-              }
-            ]}
-          >
-            <InputComponent name="discount" value={stateProduct.discount} onChange={handleOnChange} />
-          </Form.Item>
-          <Form.Item
-            label="Image"
-            name="image"
-            rules={[
-              {
-                required: true,
-                message: 'Please input product image!'
-              }
-            ]}
-          >
-            <WrapperUploadFile onChange={handleOnChangeAvatar} maxCount={1}>
-              <Button icon={<UploadOutlined />}>Select file</Button>
-              {stateProduct.image && (
-                <img
-                  src={stateProduct.image}
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Row justify="space-between" align="middle">
+            <Col>
+              <Title level={2} style={{ color: '#FFF8A3', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <CodeSandboxOutlined style={{ fontSize: '24px', color: '#FFC107' }} />
+                Tạo sản phẩm
+              </Title>
+              <Text style={{ color: '#B3A37C' }}>Tạo mới thông tin sản phẩm đồng hồ</Text>
+            </Col>
+            <Col>
+              <Space>
+                <Button
+                  style={{ borderColor: '#2E363F', color: '#FFF8A3', background: '#252F33', padding: '20px 24px' }}
+                  icon={<CloseOutlined />}
+                >
+                  Hủy
+                </Button>
+                <Button
                   style={{
-                    height: '60px',
-                    width: '60px',
-                    borderRadius: '50%',
-                    objectFit: 'cover'
+                    background: 'linear-gradient(135deg, #FFC107, #E6A306)',
+                    color: '#1D2528',
+                    padding: '20px 24px'
                   }}
-                  alt="avatar"
-                />
-              )}
-            </WrapperUploadFile>
-          </Form.Item>
+                  icon={<SaveOutlined />}
+                  htmlType="submit"
+                  form="basic"
+                >
+                  Lưu sản phẩm
+                </Button>
+              </Space>
+            </Col>
+          </Row>
 
-          <Form.Item
-            wrapperCol={{
-              offset: 8,
-              span: 16
-            }}
+          <Form
+            id="basic"
+            name="basic"
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 22 }}
+            onFinish={onFinish}
+            onFinishFailed={onFinishFailed}
+            autoComplete="on"
+            form={form}
           >
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
+            <Row gutter={[24, 24]}>
+              <Col xs={24} lg={16}>
+                <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                  <Card
+                    title={
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <Space>
+                          <FileTextOutlined style={{ color: '#FFC107' }} />
+                          <Title level={3} style={{ color: '#FFF8A3', margin: 0 }}>
+                            Thông tin cơ bản
+                          </Title>
+                        </Space>
+                        <Text style={{ color: '#B3A37C' }}>Nhập thông tin cơ bản của sản phẩm đồng hồ</Text>
+                      </div>
+                    }
+                    style={{
+                      background: '#21282B',
+                      borderColor: '#2E363F',
+                      boxShadow: '0 8px 30px -8px rgba(0, 0, 0, 0.4)',
+                      paddingTop: '24px'
+                    }}
+                  >
+                    <Space direction="vertical" size="large">
+                      <Form.Item
+                        label={<Text style={{ color: '#fff', marginRight: '11px' }}>Tên sản phẩm</Text>}
+                        name="name"
+                        rules={[{ required: true, message: 'Please input product name!' }]}
+                      >
+                        <InputComponent
+                          name="name"
+                          value={stateProduct.name}
+                          onChange={handleOnChange}
+                          style={{ background: '#252F33', borderColor: '#2E363F', color: '#fff' }}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label={<Text style={{ color: '#fff', marginRight: '9px' }}>Loại sản phẩm</Text>}
+                        name="type"
+                        rules={[{ required: true, message: 'Please input product type!' }]}
+                      >
+                        <StyledSelect
+                          name={typeSelect !== 'add_type' ? 'type' : ''}
+                          value={stateProduct.type}
+                          style={{
+                            border: '2px solid #2E363F',
+                            borderRadius: '6px',
+                            background: '#252F33 !important',
+                            '& .ant-select-selector': {
+                              background: '#252F33 !important'
+                            },
+                            color: '#fff'
+                          }}
+                          onChange={handleChangeSelect}
+                          options={renderOptions(typeProduct?.data?.data)}
+                        />
+                      </Form.Item>
+                      {stateProduct.type === 'add_type' && (
+                        <Form.Item
+                          label={<Text style={{ color: '#fff', marginRight: '11px' }}>New Type</Text>}
+                          name="newType"
+                          rules={[{ required: true, message: 'Please input product type!' }]}
+                        >
+                          <InputComponent
+                            value={stateProduct.newType}
+                            onChange={handleOnChange}
+                            name="newType"
+                            style={{ background: '#252F33', borderColor: '#2E363F', color: '#fff' }}
+                          />
+                        </Form.Item>
+                      )}
+                      <Form.Item
+                        label={<Text style={{ color: '#fff' }}>Mô tả sản phẩm</Text>}
+                        name="description"
+                        rules={[{ required: true, message: 'Please input product description!' }]}
+                      >
+                        <ReactQuill
+                          value={stateProduct.description}
+                          onChange={handleChangeDescription}
+                          style={{ background: '#252F33', borderColor: '#2E363F', color: '#fff' }}
+                          theme="snow"
+                          modules={modules}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label={<Text style={{ color: '#fff', marginRight: '44px' }}>Giảm giá</Text>}
+                        name="discount"
+                        rules={[{ required: true, message: 'Please input product discount!' }]}
+                      >
+                        <InputComponent
+                          name="discount"
+                          value={stateProduct.discount}
+                          onChange={handleOnChange}
+                          style={{ background: '#252F33', borderColor: '#2E363F', color: '#fff' }}
+                        />
+                      </Form.Item>
+                    </Space>
+                  </Card>
+
+                  <Card
+                    title={
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <Space>
+                          <DollarOutlined style={{ color: '#FFC107' }} />
+                          <Title level={4} style={{ color: '#FFF8A3', margin: 0 }}>
+                            Giá & Kho hàng
+                          </Title>
+                        </Space>
+                        <Text style={{ color: '#B3A37C' }}>Thiết lập giá bán và quản lý số lượng tồn kho</Text>
+                      </div>
+                    }
+                    style={{
+                      background: '#21282B',
+                      borderColor: '#2E363F',
+                      boxShadow: '0 8px 30px -8px rgba(0, 0, 0, 0.4)',
+                      paddingTop: '24px'
+                    }}
+                  >
+                    <Space direction="horizontal" size="middle" style={{ width: '100%' }}>
+                      <Row gutter={[16, 16]}>
+                        <Col xs={24} md={24}>
+                          <Form.Item
+                            label={<Text style={{ color: '#fff' }}>Giá bán VNĐ</Text>}
+                            name="price"
+                            rules={[{ required: true, message: 'Please input product price!' }]}
+                          >
+                            <InputComponent
+                              type="number"
+                              name="price"
+                              value={stateProduct.price}
+                              onChange={handleOnChange}
+                              style={{ background: '#252F33', borderColor: '#2E363F', color: '#fff' }}
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} md={24}>
+                          <Form.Item
+                            label={<Text style={{ color: '#fff' }}>Số lượng</Text>}
+                            name="countInStock"
+                            rules={[{ required: true, message: 'Please input product countInStock!' }]}
+                          >
+                            <InputComponent
+                              type="number"
+                              name="countInStock"
+                              value={stateProduct.countInStock}
+                              onChange={handleOnChange}
+                              style={{ background: '#252F33', borderColor: '#2E363F', color: '#fff' }}
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Space>
+                  </Card>
+                </Space>
+              </Col>
+
+              <Col xs={24} lg={8}>
+                <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                  <Card
+                    title={
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <Space>
+                          <UploadOutlined style={{ color: '#FFC107' }} />
+                          <Title level={4} style={{ color: '#FFF8A3', margin: 0 }}>
+                            Hình ảnh sản phẩm
+                          </Title>
+                        </Space>
+                        <Text style={{ color: '#B3A37C' }}>Thêm hình ảnh để hiển thị sản phẩm</Text>
+                      </div>
+                    }
+                    style={{
+                      background: '#21282B',
+                      borderColor: '#2E363F',
+                      boxShadow: '0 8px 30px -8px rgba(0, 0, 0, 0.4)',
+                      padding: '24px 0'
+                    }}
+                  >
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                      <Form.Item name="image" rules={[{ required: true, message: 'Please input product image!' }]}>
+                        <WrapperUploadFile onChange={handleOnChangeAvatar} maxCount={1}>
+                          <Button
+                            style={{
+                              width: '375px',
+                              height: '128px',
+                              border: '2px dashed #2E363F',
+                              background: '#252F33',
+                              color: '#B3A37C'
+                            }}
+                            icon={<UploadOutlined />}
+                          >
+                            Select file
+                          </Button>
+                          {stateProduct.image && (
+                            <img
+                              src={stateProduct.image}
+                              style={{
+                                height: '60px',
+                                width: '60px',
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                              }}
+                              alt="avatar"
+                            />
+                          )}
+                        </WrapperUploadFile>
+                      </Form.Item>
+                    </Space>
+                  </Card>
+                </Space>
+              </Col>
+            </Row>
+          </Form>
+        </Space>
       </Loading>
     </div>
   )

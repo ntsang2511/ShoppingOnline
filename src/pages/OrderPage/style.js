@@ -1,36 +1,33 @@
-import { InputNumber } from 'antd'
 import styled from 'styled-components'
+import { Button, Checkbox } from 'antd'
 
-export const WrapperStyleHeader = styled.div`
-  background: rgb(255, 255, 255);
-  padding: 9px 16px;
-  border-radius: 4px;
+export const WrapperContainer = styled.div`
   display: flex;
-  align-items: center;
-  span {
-    color: rgb(36, 36, 36);
-    font-weight: 400;
-    font-size: 13px;
-  }
-`
+  justify-content: center;
+  gap: 20px;
 
-export const WrapperStyleHeaderDelivery = styled.div`
-  background: rgb(255, 255, 255);
-  padding: 9px 16px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  span {
-    color: rgb(36, 36, 36);
-    font-weight: 400;
-    font-size: 13px;
+  @media (max-width: 768px) {
+    flex-direction: column;
   }
-  margin-bottom: 4px;
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    flex-direction: column;
+    gap: 10px;
+  }
 `
 
 export const WrapperLeft = styled.div`
-  width: 910px;
+  width: 840px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 100%;
+  }
 `
+
 export const WrapperListOrder = styled.div`
   width: 100%;
 `
@@ -44,60 +41,103 @@ export const WrapperItemOrder = styled.div`
   margin-top: 12px;
 `
 
-export const WrapperPriceDiscount = styled.span`
-  text-decoration: line-through;
-  margin-left: 4px;
-`
-export const WrapperCountOrder = styled.div`
-  display: flex;
-
-  align-items: center;
-  border-radius: 4px;
-  width: fit-content;
-  height: fit-content;
-  border: 1px solid #ccc;
-`
-
-export const WrapperInputNumber = styled(InputNumber)`
-  &.ant-input-number.ant-input-number-sm {
-    width: 40px;
-    border-top: none;
-    border-bottom: none;
-    .ant-input-number-handler-wrap {
-      display: none !important;
-    }
-  }
-`
 export const WrapperRight = styled.div`
-  width: 250px;
+  width: 320px;
   margin-left: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: center;
-`
-export const WrapperInfo = styled.div`
-  padding: 17px 20px;
-  border-bottom: 1px solid #f5f5f5;
-  font-size: 15px;
-  background: #fff;
-  border-top-right-radius: 6px;
-  border-top-left-radius: 6px;
-  width: 100%;
-`
-export const WrapperTotal = styled.div`
-  display: flex;
-  width: 250px;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 17px 20px;
-  background: #fff;
-  border-bottom-right-radius: 6px;
-  border-bottom-left-radius: 6px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 100%;
+    margin-left: 0;
+  }
 `
 
 export const WrapperOrderItem = styled.div`
   display: flex;
   width: 100%;
   margin-top: 10px;
+`
+
+export const WrapperStyleHeader = styled.div`
+  background: #1a1a1a;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  span {
+    color: rgb(36, 36, 36);
+    font-weight: 400;
+    font-size: 13px;
+  }
+`
+
+export const WrapperStyleHeaderDelivery = styled.div`
+  background: #221f1d;
+  border: 1px solid #3b3330;
+  padding: 9px 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  span {
+    color: #ffe8a3 !important;
+    font-weight: 400;
+    font-size: 13px;
+  }
+  margin-bottom: 4px;
+`
+
+export const ButtonDeleteAll = styled(Button)`
+  background-color: #f5222d;
+  border: none;
+  & span {
+    color: #ffffff !important;
+  }
+  &:hover {
+    background-color: #c41d1d !important;
+  }
+`
+
+export const CheckBoxAll = styled(Checkbox)`
+  margin-right: 10px;
+  color: black;
+
+  .ant-checkbox-inner {
+    border: 1px solid #3b3330;
+  }
+
+  /* Kiểu dáng khi checkbox được checked */
+  .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: #ffc107fd;
+    border-color: #ffc107;
+  }
+
+  /* Đặt màu trắng cho dấu check */
+  .ant-checkbox-checked .ant-checkbox-inner::after {
+    border-color: white !important;
+    background-color: transparent !important; /* Loại bỏ background mặc định của dấu check */
+  }
+
+  /* Hiệu ứng hover khi chưa checked */
+  .ant-checkbox-wrapper:not(.ant-checkbox-wrapper-disabled):hover .ant-checkbox-inner,
+  .ant-checkbox:not(.ant-checkbox-disabled):hover .ant-checkbox-inner {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+  }
+
+  /* Hiệu ứng hover khi đã checked */
+  .ant-checkbox-wrapper:not(.ant-checkbox-wrapper-disabled):hover
+    .ant-checkbox-checked:not(.ant-checkbox-disabled)
+    .ant-checkbox-inner,
+  .ant-checkbox-wrapper-checked:not(.ant-checkbox-wrapper-disabled):hover .ant-checkbox-inner,
+  .ant-checkbox-checked:not(.ant-checkbox-disabled):hover .ant-checkbox-inner {
+    background-color: #ffc107dd !important;
+    border-color: #ffc107dd !important;
+  }
 `

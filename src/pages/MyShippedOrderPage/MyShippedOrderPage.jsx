@@ -54,8 +54,6 @@ function MyShippedOrderPage() {
     }
   }, [user])
 
-  console.log(data)
-
   const mutation = useMutationHook((data) => {
     const { id, token } = data
     const res = OrderService.cancelOrder(id, token)

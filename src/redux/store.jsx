@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import productReducer from './slices/productSlice'
 import userReducer from './slices/userSlice'
 import orderReducer from './slices/orderSlice'
+import stateManagementReducer from './slices/stateManageSlice'
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 const persistConfig = {
@@ -14,7 +15,8 @@ const persistConfig = {
 const rootReducer = combineReducers({
   product: productReducer,
   user: userReducer,
-  order: orderReducer
+  order: orderReducer,
+  stateManage: stateManagementReducer
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

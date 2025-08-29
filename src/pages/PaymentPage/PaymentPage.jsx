@@ -1,6 +1,5 @@
-import { Form, Radio } from 'antd'
-import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
-import { Label, WrapperInfo, WrapperLeft, WrapperRadio, WrapperRight, WrapperTotal } from './style'
+import { Form } from 'antd'
+import { WrapperInfo, WrapperLayout, WrapperLeft, WrapperRight } from './style'
 import { useDispatch, useSelector } from 'react-redux'
 import * as OrderService from '../../services/OrderService'
 import { error, success } from '../../components/Message/Message'
@@ -17,29 +16,25 @@ import { useNavigate } from 'react-router-dom'
 import { removeAllOrderProduct } from '../../redux/slices/orderSlice'
 import * as PaymentService from '../../services/PaymentService'
 import * as CartService from '../../services/CartService'
+import { PaymentMethodSection } from '../../components/PaymentMethodSection/PaymentMethodSection'
+import { ShippingSection } from '../../components/ShippingSection/ShippingSection'
+import { OrderSummary } from '../../components/OrderSumary/OrderSumary'
 function PaymentPage() {
   const [delivery, setDelivery] = useState('fast')
   const [payment, setPayment] = useState('later_money')
-  const [stateUserDetails, setStateUserDetails] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    city: ''
-  })
+  const [stateUserDetails, setStateUserDetails] = useState({ name: '', phone: '', address: '', city: '' })
   const [form] = Form.useForm()
   const navigate = useNavigate()
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
   const order = useSelector((state) => state.order)
   const user = useSelector((state) => state.user)
   const dispatch = useDispatch()
+
   const handleOnChangeDetails = useCallback(
     debounce((e) => {
-      setStateUserDetails((prevState) => ({
-        ...prevState,
-        [e.target.name]: e.target.value
-      }))
+      setStateUserDetails((prevState) => ({ ...prevState, [e.target.name]: e.target.value }))
     }, 500),
-    [] // Delay 500ms
+    []
   )
 
   useEffect(() => {
@@ -70,12 +65,9 @@ function PaymentPage() {
   }, [order])
   const priceDiscountMemo = useMemo(() => {
     const result = order?.orderItemsSelected?.reduce((total, current) => {
-      return total + current.discount * current.amount
+      return total + current.discount * 0.01 * current.price * current.amount
     }, 0)
-    if (Number(result)) {
-      return result
-    }
-    return 0
+    return Number(result) || 0
   }, [order])
   const deliveryPriceMemo = useMemo(() => {
     if (priceMemo > 200000 && priceMemo <= 500000) {
@@ -87,7 +79,7 @@ function PaymentPage() {
     }
   }, [order])
   const totalPriceMemo = useMemo(() => {
-    return priceMemo - priceDiscountMemo * 0.01 * priceMemo + deliveryPriceMemo
+    return priceMemo - priceDiscountMemo + deliveryPriceMemo
   }, [priceMemo, priceDiscountMemo, deliveryPriceMemo])
 
   const mutationAddOrder = useMutationHook((data) => {
@@ -116,34 +108,22 @@ function PaymentPage() {
         arrayOrder.push(element.product)
       })
       dispatch(removeAllOrderProduct({ listChecked: arrayOrder }))
-      mutationDeleteAll.mutate({
-        userId: user.id,
-        productIds: arrayOrder
-      })
+      mutationDeleteAll.mutate({ userId: user.id, productIds: arrayOrder })
       success('Đặt hàng thành công')
-      console.log(data)
       if (payment !== 'zalopayapp') {
         navigate('/orderSuccess', {
-          state: {
-            delivery,
-            payment,
-            order: order?.orderItemsSelected,
-            totalPrice: totalPriceMemo
-          }
+          state: { delivery, payment, order: order?.orderItemsSelected, totalPrice: totalPriceMemo }
         })
       } else {
         if (data?.status === 'OK') {
           const orderId = data?.data?._id
           const newOrderItems = data?.data?.orderItems.map(({ image, ...rest }) => {
-            return {
-              ...rest,
-              orderId
-            }
+            return { ...rest, orderId }
           })
           const orderInfo = {
             totalPrice: totalPriceMemo,
-            orderId: data?.data?._id, // Lấy ID đơn hàng từ phản hồi
-            orderInfo: 'Thanh toán đơn hàng qua ZaloPay', // Thông tin đơn hàng
+            orderId: data?.data?._id,
+            orderInfo: 'Thanh toán đơn hàng qua ZaloPay',
             items: newOrderItems,
             user: data?.data?.user
           }
@@ -171,13 +151,14 @@ function PaymentPage() {
       error()
     }
   }, [isSuccess, isError, data?.status])
+
+  useEffect(() => {
+    if (order?.orderItemsSelected?.length === 0 && isSuccess === false) {
+      navigate('/order')
+    }
+  }, [order?.orderItemsSelected?.length])
   const handleCancelUpdate = () => {
-    setStateUserDetails({
-      name: '',
-      phone: '',
-      address: '',
-      city: ''
-    })
+    setStateUserDetails({ name: '', phone: '', address: '', city: '' })
     setIsOpenModalUpdateInfo(false)
   }
 
@@ -260,105 +241,48 @@ function PaymentPage() {
     setPayment(e.target.value)
   }
   return (
-    <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
+    <div style={{ background: '#1a1a1a', width: '100%' }}>
       <Loading isLoading={isPending}>
-        <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
-          <h2 style={{ padding: '10px' }}>Thanh toán</h2>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ height: '100%', margin: '0 auto' }}>
+          <h2 style={{ padding: '10px', color: '#ffc107', fontSize: '2.3rem', paddingLeft: '10%', marginBottom: '0' }}>
+            Thanh toán
+          </h2>
+          <h4
+            style={{
+              color: '#c2b280',
+              paddingLeft: '10%',
+              marginTop: 0,
+              fontSize: '1.5rem',
+              fontWeight: '500',
+              marginBottom: '16px'
+            }}
+          >
+            Hoàn tất đơn hàng của bạn
+          </h4>
+          <WrapperLayout>
             <WrapperLeft>
               <WrapperInfo>
-                <div>
-                  <Label>Chọn phương thức giao hàng</Label>
-                  <WrapperRadio onChange={handleDelivery} value={delivery}>
-                    <Radio value="fast">
-                      <span style={{ color: '#ea8500', fontWeight: 'bold' }}>FAST</span> Giao hàng tiết kiệm
-                    </Radio>
-                    <Radio value="gojek">
-                      <span style={{ color: '#ea8500', fontWeight: 'bold' }}>GO_JEK</span> Giao hàng tiết kiệm
-                    </Radio>
-                  </WrapperRadio>
-                </div>
+                <ShippingSection delivery={delivery} handleDelivery={handleDelivery} />
               </WrapperInfo>
               <WrapperInfo>
-                <div>
-                  <Label>Chọn phương thức thanh toán</Label>
-                  <WrapperRadio onChange={handlePayment} value={payment}>
-                    <Radio value="later_money"> Thanh toán tiền mặt khi nhận hàng</Radio>
-                    <Radio value="zalopayapp"> Thanh toán tiền bằng ZaloPay</Radio>
-                  </WrapperRadio>
-                </div>
+                <PaymentMethodSection payment={payment} handlePayment={handlePayment} />
               </WrapperInfo>
             </WrapperLeft>
-            <WrapperRight style={{ marginLeft: '100px' }}>
-              <WrapperInfo style={{ marginLeft: '40px' }}>
-                <div>
-                  <span>Địa chỉ: </span>
-                  <span style={{ color: 'blue', fontWeight: 'bold' }}>
-                    {user?.address} {user?.city}
-                  </span>
-                  <span onClick={handleChangeAddress} style={{ paddingLeft: '5px', color: 'blue', cursor: 'pointer' }}>
-                    Thay đổi
-                  </span>
-                </div>
-              </WrapperInfo>
-              <div style={{ width: '100%' }}>
-                <WrapperInfo>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Tạm tính</span>
-                    <span style={{ color: '#000', fontSize: '14px', fontWeight: 700 }}>{convertPrice(priceMemo)}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Giảm giá</span>
-                    <span style={{ color: '#000', fontSize: '14px', fontWeight: 700 }}>
-                      {convertPrice(priceDiscountMemo * 0.01 * priceMemo)}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Phí giao hàng</span>
-                    <span style={{ color: '#000', fontSize: '14px', fontWeight: 700 }}>
-                      {convertPrice(deliveryPriceMemo)}
-                    </span>
-                  </div>
-                </WrapperInfo>
-                <WrapperTotal>
-                  <span style={{ fontSize: '20px' }}>Tổng tiền</span>
-                  <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    <span style={{ color: 'rgb(254,56,52)', fontSize: '24px' }}>{convertPrice(totalPriceMemo)}</span>
-                    <span style={{ color: '#000', fontSize: '11px' }}>(Đã bao gồm VAT nếu có)</span>
-                  </span>
-                </WrapperTotal>
-              </div>
-              {payment === 'zalopayapp' ? (
-                <ButtonComponent
-                  onClick={() => handleAddOrderWithZaloPay()}
-                  styleButton={{
-                    background: 'rgb(255,57,69)',
-                    height: '40px',
-                    width: '290px',
-                    marginLeft: '41px',
-                    border: 'none',
-                    borderRadius: '4px'
-                  }}
-                  textButton={'Thanh toán bằng ZaloPay'}
-                  styleTextButton={{ color: '#fff', fontSize: '15px' }}
-                />
-              ) : (
-                <ButtonComponent
-                  onClick={() => handleAddOrder()}
-                  styleButton={{
-                    background: 'rgb(255,57,69)',
-                    height: '40px',
-                    width: '290px',
-                    marginLeft: '41px',
-                    border: 'none',
-                    borderRadius: '4px'
-                  }}
-                  textButton={'Đặt hàng'}
-                  styleTextButton={{ color: '#fff', fontSize: '15px' }}
-                />
-              )}
+            <WrapperRight>
+              <OrderSummary
+                user={user}
+                priceMemo={priceMemo}
+                priceDiscountMemo={priceDiscountMemo}
+                deliveryPriceMemo={deliveryPriceMemo}
+                totalPriceMemo={totalPriceMemo}
+                payment={payment}
+                handleChangeAddress={handleChangeAddress}
+                handleAddOrder={handleAddOrder}
+                handleAddOrderWithZaloPay={handleAddOrderWithZaloPay}
+                convertPrice={convertPrice}
+              />
             </WrapperRight>
-          </div>
+          </WrapperLayout>
         </div>
 
         <ModalComponent
@@ -370,66 +294,28 @@ function PaymentPage() {
           <Loading isLoading={isLoadingUpdate}>
             <Form
               name="basic"
-              labelCol={{
-                span: 8
-              }}
-              wrapperCol={{
-                span: 18
-              }}
-              style={{
-                maxWidth: 1200
-              }}
+              labelCol={{ span: 8 }}
+              wrapperCol={{ span: 18 }}
+              style={{ maxWidth: 1200 }}
               // onFinish={onUpdateUser}
               // onFinishFailed={onFinishFailedDetail}
               autoComplete="off"
               form={form}
             >
-              <Form.Item
-                label="Name"
-                name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your name!'
-                  }
-                ]}
-              >
+              <Form.Item label="Name" name="name" rules={[{ required: true, message: 'Please input your name!' }]}>
                 <InputComponent name="name" value={stateUserDetails.name} onChange={handleOnChangeDetails} />
               </Form.Item>
-              <Form.Item
-                label="City"
-                name="city"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your city!'
-                  }
-                ]}
-              >
+              <Form.Item label="City" name="city" rules={[{ required: true, message: 'Please input your city!' }]}>
                 <InputComponent name="city" value={stateUserDetails.city} onChange={handleOnChangeDetails} />
               </Form.Item>
-              <Form.Item
-                label="Phone"
-                name="phone"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your phone!'
-                  }
-                ]}
-              >
+              <Form.Item label="Phone" name="phone" rules={[{ required: true, message: 'Please input your phone!' }]}>
                 <InputComponent name="phone" value={stateUserDetails.phone} onChange={handleOnChangeDetails} />
               </Form.Item>
 
               <Form.Item
                 label="Address"
                 name="address"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Please input your address!'
-                  }
-                ]}
+                rules={[{ required: true, message: 'Please input your address!' }]}
               >
                 <InputComponent name="address" value={stateUserDetails.address} onChange={handleOnChangeDetails} />
               </Form.Item>

@@ -1,18 +1,7 @@
-import { Button, Col, Form, Image, Pagination, Rate, Row, Select } from 'antd'
-import {
-  ReviewItem,
-  WrapperAddressProduct,
-  WrapperInputNumber,
-  WrapperPriceProduct,
-  WrapperPriceTextProduct,
-  WrapperQuantityProduct,
-  WrapperStyleNameProduct,
-  WrapperStyleTextSell
-} from './style'
-import { DeleteOutlined, MinusOutlined, PlusOutlined, StarFilled } from '@ant-design/icons'
-import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
+import { Button, Card, Col, Form, Image, Row } from 'antd'
+import { IconButton, WrapperInputNumber } from './style'
+import { CreditCardOutlined, MinusOutlined, PlusOutlined, ShoppingCartOutlined, StarFilled } from '@ant-design/icons'
 import { updateUser } from '../../redux/slices/userSlice'
-
 import { useQuery } from '@tanstack/react-query'
 import Loading from '../LoadingComponent/Loading'
 import { useCallback, useEffect, useState } from 'react'
@@ -25,11 +14,10 @@ import * as ProductService from '../../services/ProductService'
 import * as CartService from '../../services/CartService'
 import * as ProductRatingService from '../../services/ProductRatingService'
 import * as UserService from '../../services/UserService'
-import TextArea from 'antd/es/input/TextArea'
-import LikeButtonComponent from '../LikeButtonComponent/LikeButtonComponent'
 import ModalComponent from '../ModalComponent/ModalComponent'
 import InputComponent from '../InputComponent/InputComponent'
 import { debounce } from 'lodash'
+import { CommentComponent } from '../CommentComponent/CommentComponent'
 
 function ProductDetailComponent({ idProduct }) {
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
@@ -39,17 +27,13 @@ function ProductDetailComponent({ idProduct }) {
     address: '',
     city: ''
   })
+  const [averageRating, setAverageRating] = useState(0)
+  const [ratings, setRatings] = useState([]) // State để lưu danh sách đánh giá
   const user = useSelector((state) => state.user)
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
   const [form] = Form.useForm()
-  const [stateProductRating, setStateProductRating] = useState({
-    user: user.name,
-    name: '',
-    rating: 0,
-    comment: ''
-  })
   const [numProduct, setNumProduct] = useState(1)
   const [paginate, setPaginate] = useState({
     page: 0,
@@ -62,15 +46,6 @@ function ProductDetailComponent({ idProduct }) {
   })
   const mutationProductRating = useMutationHook((data) => {
     const res = ProductRatingService.getProductRating(data)
-
-    return res
-  })
-  const mutationCreateRating = useMutationHook((data) => {
-    const res = ProductRatingService.createProductRating(data)
-    return res
-  })
-  const mutationDeleteRating = useMutationHook((data) => {
-    const res = ProductRatingService.deleteproductRating(data)
     return res
   })
 
@@ -121,32 +96,20 @@ function ProductDetailComponent({ idProduct }) {
   }
 
   const { data: dataProductRating } = mutationProductRating
-  const { isSuccess } = mutationCreateRating
-  const { isPending: isPendingDelete, isSuccess: isSuccessDelete } = mutationDeleteRating
   const { isPending: isLoadingUpdate } = mutationUpdate
+
+  // Cập nhật rating của sản phẩm khi danh sách đánh giá thay đổi
   useEffect(() => {
-    if (productDetails?.name) {
-      let name = productDetails?.name
-      let page = paginate.page
-      let limit = paginate.limit
-      mutationProductRating.mutate(
-        { name, page, limit },
-        {
-          onSuccess: (data) => {
-            const count = Math.ceil(
-              data.data.map((item) => item.rating).reduce((sum, current) => sum + current, 0) / data.data.length
-            )
-            if (productDetails?.rating !== count) {
-              const { _id, ...data } = productDetails
-              console.log(_id, productDetails)
-              const newData = { ...data, rating: count }
-              mutationUpdateProduct.mutate({ id: _id, data: newData })
-            }
-          }
-        }
-      )
+    if (productDetails?._id && ratings.length > 0) {
+      const count = Math.ceil(ratings.reduce((sum, comment) => sum + comment.rating, 0) / ratings.length) || 0
+      if (productDetails.rating !== count) {
+        const { _id, ...data } = productDetails
+        const newData = { ...data, rating: count }
+        mutationUpdateProduct.mutate({ id: _id, data: newData })
+      }
     }
-  }, [productDetails, isSuccess, isSuccessDelete])
+  }, [ratings, productDetails, mutationUpdateProduct])
+
   useEffect(() => {
     if (isOpenModalUpdateInfo) {
       setStateUserDetails({
@@ -158,6 +121,7 @@ function ProductDetailComponent({ idProduct }) {
       })
     }
   }, [isOpenModalUpdateInfo])
+
   useEffect(() => {
     form.setFieldsValue(stateUserDetails)
   }, [form, stateUserDetails])
@@ -192,62 +156,22 @@ function ProductDetailComponent({ idProduct }) {
     }
   }
 
-  const parseDescription = (text) => {
-    // Tách đoạn văn bản dựa trên dấu `##`
-    const lines = text?.split('\n')?.filter((line) => line.trim() !== '')
-    return lines?.map((line, index) => {
-      if (line?.startsWith('##')) {
-        // Nếu dòng bắt đầu bằng `##`, trả về nội dung in đậm
-        return (
-          <div key={index} style={{ display: 'flex', justifyContent: 'center', fontSize: '2rem', color: '#FFD700' }}>
-            <h3 style={{ display: 'block', marginBottom: '8px' }}>{line.replace('##', '')}</h3>
-          </div>
-        )
-      }
-      // Các dòng khác sẽ là nội dung bình thường
-      return (
-        <p key={index} style={{ marginBottom: '8px', fontSize: '1.5rem', color: '#fff' }}>
-          {line}
-        </p>
-      )
-    })
-  }
-  const handleOnChange = (e) => {
-    // setStateProduct({
-    //   ...stateProduct,
-    //   [e.target.name]: e.target.value
-    // })
-    form.setFieldsValue({ [e.target.name]: e.target.value }) // Cập nhật giá trị trong form
-    setStateProductRating((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
+  const parseDescription = (html) => {
+    if (!html) return null
 
-  const handleChangeRating = (value) => {
-    setStateProductRating({
-      ...stateProductRating,
-      rating: value
-    })
-  }
-  const renderStar = (rating) => {
     return (
-      <div>
-        {rating} <StarFilled style={{ color: 'yellow' }} />
-      </div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          color: '#A69E80'
+        }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
     )
   }
-  const onFinish = () => {
-    setStateProductRating((prevState) => {
-      const updatedState = {
-        ...prevState,
-        name: productDetails?.name,
-        user: user.name
-      }
-      mutationCreateRating.mutate(updatedState)
-      return updatedState
-    })
-  }
+
   const handleOnChangeDetails = useCallback(
     debounce((e) => {
       setStateUserDetails((prevState) => ({
@@ -255,7 +179,7 @@ function ProductDetailComponent({ idProduct }) {
         [e.target.name]: e.target.value
       }))
     }, 500),
-    [] // Delay 500ms
+    []
   )
   const handleUpdateInfoUser = () => {
     const { name, address, city, phone } = stateUserDetails
@@ -281,13 +205,6 @@ function ProductDetailComponent({ idProduct }) {
     })
     setIsOpenModalUpdateInfo(false)
   }
-  const handleDelete = (id) => {
-    mutationDeleteRating.mutate(id)
-  }
-  const onFinishFailed = () => {}
-  const handleChangeAddress = () => {
-    setIsOpenModalUpdateInfo(true)
-  }
 
   const fetchAllComment = async (name, page, limit) => {
     mutationProductRating.mutate(
@@ -302,231 +219,161 @@ function ProductDetailComponent({ idProduct }) {
     )
   }
   useEffect(() => {
-    console.log('Updated paginate:', paginate)
-  }, [paginate])
-  useEffect(() => {
     fetchAllComment(productDetails?.name, paginate.page, paginate.limit)
   }, [paginate.page, productDetails?.name])
-  const onChangePaginate = (current, pageSize) => {
-    console.log(current, pageSize)
-    setPaginate({ ...paginate, page: current - 1, limit: pageSize })
-  }
-  return (
-    <Loading isLoading={isPending || isFetching || isPendingDelete}>
-      <Row style={{ padding: '16px', backgroundColor: '#333' }}>
-        <Col span={10} style={{ paddingRight: '10px' }}>
-          <Image src={productDetails?.image} alt="Image product" preview={true} />
-        </Col>
-        <Col span={14}>
-          <WrapperStyleNameProduct>{productDetails?.name}</WrapperStyleNameProduct>
-          <div>
-            <Rate
-              disabled
-              value={
-                Math.ceil(
-                  dataProductRating?.data?.map((item) => item.rating).reduce((sum, current) => sum + current, 0) /
-                    dataProductRating?.data?.length
-                ) || 0
-              }
-              style={{ fontSize: '12px', color: 'rgb(251,216,54)' }}
-            />
-            <WrapperStyleTextSell> | Đã bán {productDetails?.selled || 0}</WrapperStyleTextSell>
-          </div>
-          <div style={{ marginTop: '10px' }}>
-            {productDetails?.countInStock === 0 || numProduct === productDetails?.countInStock ? (
-              <span style={{ color: 'red' }}>Sản phẩm đã hết hàng</span>
-            ) : (
-              <span style={{ color: 'green' }}>Số lượng còn lại: {productDetails?.countInStock}</span>
-            )}
-          </div>
-          <WrapperPriceProduct>
-            <WrapperPriceTextProduct>{convertPrice(productDetails?.price)}</WrapperPriceTextProduct>
-          </WrapperPriceProduct>
 
-          <WrapperAddressProduct>
-            <span style={{ color: '#fff' }}>Giao đến </span>
-            <span style={{ color: 'blue' }}>{user.address}</span>-
-            <span onClick={handleChangeAddress} className="change_address" style={{ cursor: 'pointer' }}>
-              Đổi địa chỉ
-            </span>
-          </WrapperAddressProduct>
-          <div>
-            <LikeButtonComponent dataHref={'https://developers.facebook.com/docs/plugins/'} />
-          </div>
-          <div style={{ margin: '10px 0 20px' }}>
-            <div style={{ marginBottom: '6px', color: '#fff' }}>Số lượng</div>
-            <WrapperQuantityProduct>
-              <button
-                onClick={() => handleChangeCount('decrease', productDetails?.countInStock)}
-                style={{ border: 'none', backgroundColor: 'transparent' }}
-              >
-                <MinusOutlined style={{ fontSize: '20px', color: '#fff' }} size="14px" />
-              </button>
-              <WrapperInputNumber onChange={onChange} min={1} value={numProduct} size="small" />
-              <button
-                onClick={() => handleChangeCount('increase', productDetails?.countInStock)}
-                style={{ border: 'none', backgroundColor: 'transparent' }}
-              >
-                <PlusOutlined style={{ fontSize: '20px', color: '#fff' }} size="14px" />
-              </button>
-            </WrapperQuantityProduct>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <ButtonComponent
-              size={40}
-              styleButton={{
-                backgroundColor: 'rgb(255,57,69)',
-                height: '48px',
-                width: '220px',
-                border: 'none',
-                borderRadius: '4px'
-              }}
-              textButton="Chọn mua"
-              onClick={handleAddOrderProduct}
-              disabled={productDetails?.countInStock === 0}
-              styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: 700 }}
-            />
-            <ButtonComponent
-              size={40}
-              styleButton={{
-                backgroundColor: 'transparent',
-                height: '48px',
-                width: '220px',
-                border: '1px solid rgb(13, 92, 182)',
-                borderRadius: '4px'
-              }}
-              textButton="Mua trả sau"
-              styleTextButton={{ color: 'rgb(13, 92, 182)', fontSize: '15px' }}
-            />
-          </div>
-        </Col>
-        <div style={{ marginTop: '50px', padding: '16px', backgroundColor: '#3A3A3A', width: '100%' }}>
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', color: '#E57373', fontSize: '3rem' }}>
-            <h3>Thông tin mô tả</h3>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'start', color: '#000' }}>
-            {isPending || isFetching ? (
-              <p style={{ fontSize: '2rem', color: '#000' }}>Đang tải thông tin mô tả...</p>
-            ) : (
-              parseDescription(productDetails?.description)
-            )}
-          </div>
-        </div>
-        <div style={{ width: '100%', backgroundColor: '#3A3A3A', paddingTop: '100px' }}>
-          <h2 style={{ color: '#FFD700' }}>Đánh giá của bạn</h2>
-          <Form
-            name="basic"
-            labelCol={{
-              span: 2.5
-            }}
-            wrapperCol={{
-              span: 22
-            }}
-            style={{
-              maxWidth: 1200
-            }}
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="on"
-            form={form}
-          >
-            <Form.Item label={<span style={{ color: '#FFDD99' }}>Đánh giá chất lượng</span>} name="rating">
-              <Select
-                style={{
-                  width: 120,
-                  border: '2px solid #000',
-                  borderRadius: '8px'
-                }}
-                name="rating"
-                value={stateProductRating.rating}
-                onChange={handleChangeRating}
-                options={[
-                  {
-                    value: '1',
-                    label: renderStar(1)
-                  },
-                  {
-                    value: '2',
-                    label: renderStar(2)
-                  },
-                  {
-                    value: '3',
-                    label: renderStar(3)
-                  },
-                  {
-                    value: '4',
-                    label: renderStar(4)
-                  },
-                  {
-                    value: '5',
-                    label: renderStar(5)
-                  }
-                ]}
-              />
-            </Form.Item>
-            <Form.Item label={<span style={{ color: '#FFDD99' }}>Bình luận</span>} name="comment">
-              <TextArea
-                name="comment"
-                style={{ height: '200px', border: '2px solid #000' }}
-                value={stateProductRating?.comment}
-                onChange={handleOnChange}
-              />
-            </Form.Item>
-            <Form.Item
-              wrapperCol={{
-                offset: 21,
-                span: 16
-              }}
+  const handleChangeAddress = () => {
+    setIsOpenModalUpdateInfo(true)
+  }
+
+  // Hàm renderStars cho ProductDetailComponent
+  const renderStars = (rating, interactive = false, size = '16px') => (
+    <div style={{ display: 'inline-flex', gap: '4px' }}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <StarFilled
+          key={star}
+          style={{
+            fontSize: size,
+            width: size,
+            height: size,
+            color: star <= rating ? '#FFC107' : '#A69E80',
+            cursor: interactive ? 'pointer' : 'default'
+          }}
+        />
+      ))}
+    </div>
+  )
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#1A1A1A', color: '#FFF5CC' }}>
+      {/* Main Content */}
+      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 0' }}>
+        <Row gutter={[32, 32]}>
+          {/* Product Image */}
+          <Col xs={24} lg={12}>
+            <Card
+              style={{ backgroundColor: '#1F1F1F', color: '#FFF5CC', overflow: 'hidden' }}
+              bodyStyle={{ padding: 0, position: 'relative', height: '500px' }}
             >
-              <Button
-                style={{ padding: '20px 43px', backgroundColor: 'rgb(255, 57, 69)', fontWeight: 'bold' }}
-                type="primary"
-                htmlType="submit"
-              >
-                Đăng
-              </Button>
-            </Form.Item>
-          </Form>
-        </div>
-        <div style={{ width: '100%', borderTop: '1px solid #ccc' }}></div>
-        <div style={{ width: '100%' }}>
-          <h2 style={{ color: 'red', paddingTop: '100px' }}>Đánh giá của sản phẩm</h2>
-          {dataProductRating?.data?.length > 0 ? (
-            <ul style={{ padding: 0, margin: 0 }}>
-              {dataProductRating?.data?.map((review, index) => {
-                return (
-                  <ReviewItem key={index}>
-                    <div>
-                      <h3 style={{ color: '#333' }}>{review?.user}</h3>
-                      <Rate style={{ fontSize: '1rem' }} disabled defaultValue={review?.rating} />
-                      <p style={{ fontSize: '1.5rem', color: '#333' }}>{review?.comment}</p>
-                    </div>
-                    {user.name === review.user ? (
-                      <DeleteOutlined
-                        style={{ color: 'red', fontSize: '1.5rem', cursor: 'pointer' }}
-                        onClick={() => handleDelete(review._id)}
-                      />
-                    ) : (
-                      ''
-                    )}
-                  </ReviewItem>
-                )
-              })}
-              <Pagination
-                current={paginate?.page + 1}
-                pageSize={10}
-                defaultCurrent={1}
-                total={paginate?.total * paginate?.limit}
-                onChange={onChangePaginate}
+              <Image
+                src={productDetails?.image}
+                alt="Casio Watch"
+                preview={true}
+                wrapperStyle={{
+                  width: '100%',
+                  height: '100%',
+                  overflow: 'hidden'
+                }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
               />
-            </ul>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <p style={{ fontSize: '2rem', color: 'red' }}>No reviews yet. Be the first to leave a review!</p>
+            </Card>
+          </Col>
+
+          {/* Product Info */}
+          <Col xs={24} lg={12}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div>
+                <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#FFF5CC', marginBottom: '8px' }}>
+                  {productDetails?.name}
+                </h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                  {renderStars(Math.round(averageRating), false, '16px')}
+                  <span style={{ fontSize: '14px', color: '#A69E80' }}>| Đã bán {productDetails?.selled || 0}</span>
+                </div>
+                {productDetails?.countInStock === 0 || numProduct === productDetails?.countInStock ? (
+                  <span style={{ color: 'red' }}>Sản phẩm đã hết hàng</span>
+                ) : (
+                  <p style={{ fontSize: '14px', color: '#FFC107', marginBottom: '16px' }}>
+                    Số lượng còn lại: {productDetails?.countInStock}
+                  </p>
+                )}
+
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#F5222D', marginBottom: '24px' }}>
+                  {convertPrice(productDetails?.price)}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '14px' }}>
+                  <span style={{ color: '#A69E80' }}>Giao đến</span>
+                  <span style={{ color: '#40C4FF' }}>
+                    {user.address} -{' '}
+                    <span onClick={handleChangeAddress} className="change_address" style={{ cursor: 'pointer' }}>
+                      Đổi địa chỉ
+                    </span>
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <label style={{ fontSize: '14px', color: '#A69E80' }}>Số lượng</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <IconButton
+                      onClick={() => handleChangeCount('decrease', productDetails?.countInStock)}
+                      disabled={numProduct === 1}
+                    >
+                      <MinusOutlined style={{ fontSize: '20px', color: '#fff' }} size="14px" />
+                    </IconButton>
+                    <WrapperInputNumber onChange={onChange} min={1} value={numProduct} size="small" />
+                    <IconButton onClick={() => handleChangeCount('increase', productDetails?.countInStock)}>
+                      <PlusOutlined style={{ fontSize: '20px', color: '#fff' }} size="14px" />
+                    </IconButton>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '16px' }}>
+                  <Button
+                    type="primary"
+                    danger
+                    icon={<ShoppingCartOutlined />}
+                    onClick={handleAddOrderProduct}
+                    disabled={productDetails?.countInStock === 0}
+                    style={{ flex: 1, backgroundColor: '#F5222D', color: '#FFF5CC' }}
+                    size="large"
+                  >
+                    Chọn mua
+                  </Button>
+                  <Button
+                    style={{ flex: 1, borderColor: '#40C4FF', color: '#40C4FF' }}
+                    icon={<CreditCardOutlined />}
+                    size="large"
+                  >
+                    Mua trả sau
+                  </Button>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-      </Row>
+          </Col>
+        </Row>
+
+        {/* Product Description Section */}
+        <Card style={{ marginTop: '32px', backgroundColor: '#1F1F1F', color: '#FFF5CC' }}>
+          <div style={{ padding: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFC107', marginBottom: '16px' }}>
+              Thông tin mô tả
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#A69E80' }}>
+              {isPending || isFetching ? (
+                <p style={{ fontSize: '2rem', color: '#000' }}>Đang tải thông tin mô tả...</p>
+              ) : (
+                parseDescription(productDetails?.description)
+              )}
+            </div>
+          </div>
+        </Card>
+      </main>
+
+      <CommentComponent
+        dataProductRating={dataProductRating}
+        user={user}
+        productName={productDetails?.name}
+        onAverageRatingChange={setAverageRating}
+        onRatingsChange={setRatings}
+      />
       <ModalComponent
         title="Cập nhập thông tin giao hàng"
         onOk={handleUpdateInfoUser}
@@ -545,8 +392,6 @@ function ProductDetailComponent({ idProduct }) {
             style={{
               maxWidth: 1200
             }}
-            // onFinish={onUpdateUser}
-            // onFinishFailed={onFinishFailedDetail}
             autoComplete="off"
             form={form}
           >
@@ -586,7 +431,6 @@ function ProductDetailComponent({ idProduct }) {
             >
               <InputComponent name="phone" value={stateUserDetails.phone} onChange={handleOnChangeDetails} />
             </Form.Item>
-
             <Form.Item
               label="Address"
               name="address"
@@ -602,7 +446,7 @@ function ProductDetailComponent({ idProduct }) {
           </Form>
         </Loading>
       </ModalComponent>
-    </Loading>
+    </div>
   )
 }
 

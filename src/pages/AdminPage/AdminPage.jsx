@@ -1,5 +1,5 @@
 import { Menu } from 'antd'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppstoreOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons'
 import { getItem } from '../../utils'
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent'
@@ -25,6 +25,9 @@ function AdminPage() {
         return <></>
     }
   }
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
 
   const handleOnClick = ({ key }) => {
     setKeySelected(key)

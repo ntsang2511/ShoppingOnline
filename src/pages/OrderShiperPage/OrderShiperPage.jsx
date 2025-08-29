@@ -20,7 +20,6 @@ function OrderShiperPage() {
   const { state } = location
 
   const mutationCheckDelivery = useMutationHook((data) => {
-    console.log(data)
     const res = OrderService.deliveryCheck(data)
     return res
   })
@@ -35,7 +34,6 @@ function OrderShiperPage() {
 
   const { data: dataShip, isPending: isPendingShip } = mutationGetAll
   const handleConfirmShipped = (id) => {
-    console.log(id)
     mutationCheckDelivery.mutate({ orderId: id })
   }
   const mutation = useMutationHook((data) => {

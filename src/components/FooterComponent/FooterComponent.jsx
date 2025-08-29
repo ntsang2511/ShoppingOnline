@@ -1,70 +1,476 @@
-import { FacebookFilled, InstagramFilled, LinkedinFilled } from '@ant-design/icons'
+import { Button, Input } from 'antd'
+import {
+  ClockCircleOutlined,
+  FacebookOutlined,
+  InstagramOutlined,
+  YoutubeOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  EnvironmentOutlined
+} from '@ant-design/icons'
 
-function FooterComponent() {
+const Footer = () => {
   return (
-    <div
+    <footer
       style={{
-        backgroundColor: '#1c1c1c',
-        color: '#fff',
-        padding: '40px 60px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '40px',
-        fontSize: '14px',
-        lineHeight: 1.8
+        backgroundColor: '#1C2024', // --card
+        borderTop: '1px solid #333A45' // --border
       }}
     >
-      {/* Thông tin liên hệ */}
-      <div style={{ marginLeft: '80px' }}>
-        <h3 style={{ color: '#ff4d4f' }}>Thông tin liên hệ</h3>
-        <p style={{ fontWeight: 'bold', color: '#ff4d4f' }}>CÔNG TY PHÂN PHỐI SẢN PHẨM CAO CẤP WATCH SHOP</p>
-        <p>HOTLINE: 123456789</p>
-        <p>Email: nts25112003@gmail.com</p>
-      </div>
+      <div
+        style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '0 16px'
+        }}
+      >
+        {/* Main Footer Content */}
+        <div
+          style={{
+            padding: '48px 0',
+            display: 'grid',
+            gap: '32px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))'
+          }}
+          className="sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {/* Company Info */}
+          <div
+            style={{
+              marginBottom: '24px'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '16px',
+                gap: '8px'
+              }}
+            >
+              <div
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  background: 'linear-gradient(135deg, #FFC107, #FFCA28)', // --gradient-luxury
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <ClockCircleOutlined style={{ fontSize: '24px', color: '#14171A' }} /> {/* --primary-foreground */}
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#FFE8A3' // --foreground
+                  }}
+                >
+                  WATCH SHOP
+                </span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: '#8F9BB3', // --muted-foreground
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}
+                >
+                  BEST SHOP EVER
+                </span>
+              </div>
+            </div>
+            <p
+              style={{
+                fontSize: '14px',
+                color: '#8F9BB3', // --muted-foreground
+                lineHeight: '1.5',
+                marginBottom: '16px'
+              }}
+            >
+              Chuyên cung cấp đồng hồ cao cấp từ các thương hiệu danh tiếng trên thế giới với chất lượng và dịch vụ tốt
+              nhất.
+            </p>
+            <div
+              style={{
+                display: 'flex',
+                gap: '12px'
+              }}
+            >
+              <Button
+                icon={<FacebookOutlined style={{ fontSize: '30px' }} />}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#8F9BB3', // --muted-foreground
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+              />
+              <Button
+                icon={<InstagramOutlined style={{ fontSize: '30px' }} />}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#8F9BB3',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+              />
+              <Button
+                icon={<YoutubeOutlined style={{ fontSize: '30px' }} />}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#8F9BB3', // --muted-foreground
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+              />
+            </div>
+          </div>
 
-      {/* Đơn vị vận chuyển + Thanh toán */}
-      <div style={{ marginLeft: '80px' }}>
-        <h3 style={{ color: '#ff4d4f' }}>Đơn vị vận chuyển</h3>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzgqJDFb04y7L_t3oG_LbVfov-anWOrlclIg&s"
-            alt="gojek"
-            style={{ width: '60px', height: '60px', backgroundColor: '#fff', borderRadius: '6px' }}
-          />
-          <img
-            src="https://variety.com/wp-content/uploads/2016/05/netflix-fast-com.jpg?w=640&h=351&crop=1"
-            alt="fast"
-            style={{ width: '60px', height: '60px', backgroundColor: '#fff', borderRadius: '6px' }}
-          />
+          {/* Quick Links */}
+          <div
+            style={{
+              marginBottom: '24px'
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#FFE8A3', // --foreground
+                marginBottom: '16px',
+                marginTop: 0
+              }}
+            >
+              Liên kết nhanh
+            </h3>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}
+            >
+              <li>
+                <a
+                  href="#"
+                  style={{
+                    fontSize: '14px',
+                    color: '#8F9BB3', // --muted-foreground
+                    textDecoration: 'none',
+                    transition: 'color 0.3s'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+                >
+                  Về chúng tôi
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  style={{
+                    fontSize: '14px',
+                    color: '#8F9BB3', // --muted-foreground
+                    textDecoration: 'none',
+                    transition: 'color 0.3s'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+                >
+                  Sản phẩm
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  style={{
+                    fontSize: '14px',
+                    color: '#8F9BB3', // --muted-foreground
+                    textDecoration: 'none',
+                    transition: 'color 0.3s'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+                >
+                  Tin tức
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  style={{
+                    fontSize: '14px',
+                    color: '#8F9BB3', // --muted-foreground
+                    textDecoration: 'none',
+                    transition: 'color 0.3s'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+                >
+                  Liên hệ
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  style={{
+                    fontSize: '14px',
+                    color: '#8F9BB3', // --muted-foreground
+                    textDecoration: 'none',
+                    transition: 'color 0.3s'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+                >
+                  Chính sách bảo hành
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div
+            style={{
+              marginBottom: '24px'
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#FFE8A3', // --foreground
+                marginBottom: '16px',
+                marginTop: 0
+              }}
+            >
+              Thông tin liên hệ
+            </h3>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <PhoneOutlined style={{ fontSize: '20px', color: '#FFC107' }} /> {/* --primary */}
+                <span
+                  style={{
+                    fontSize: '14px',
+                    color: '#8F9BB3' // --muted-foreground
+                  }}
+                >
+                  +84 123 456 789
+                </span>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <MailOutlined style={{ fontSize: '20px', color: '#FFC107' }} /> {/* --primary */}
+                <span
+                  style={{
+                    fontSize: '14px',
+                    color: '#8F9BB3', // --muted-foreground
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  info@watchshop.vn
+                </span>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px'
+                }}
+              >
+                <EnvironmentOutlined style={{ fontSize: '20px', color: '#FFC107', marginTop: '2px' }} />{' '}
+                {/* --primary */}
+                <span
+                  style={{
+                    fontSize: '14px',
+                    color: '#8F9BB3' // --muted-foreground
+                  }}
+                >
+                  123 Đường ABC, Quận 1, TP. Hồ Chí Minh, Việt Nam
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Newsletter */}
+          <div
+            style={{
+              marginBottom: '24px'
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#FFE8A3',
+                marginBottom: '16px',
+                marginTop: 0
+              }}
+            >
+              Đăng ký nhận tin
+            </h3>
+            <p
+              style={{
+                fontSize: '14px',
+                color: '#8F9BB3', // --muted-foreground
+                marginBottom: '16px'
+              }}
+            >
+              Nhận thông tin về sản phẩm mới và ưu đãi đặc biệt
+            </p>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}
+            >
+              <Input
+                placeholder="Email của bạn"
+                style={{
+                  backgroundColor: '#14171A', // --background
+                  border: '1px solid #333A45', // --border
+                  color: '#FFE8A3', // --foreground
+                  fontSize: '14px',
+                  padding: '8px',
+                  borderRadius: '4px'
+                }}
+              />
+              <Button
+                style={{
+                  width: '100%',
+                  backgroundColor: '#FFC107', // --primary
+                  color: '#14171A', // --primary-foreground
+                  border: 'none',
+                  fontSize: '14px',
+                  padding: '8px',
+                  borderRadius: '4px'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#FFB300')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#FFC107')}
+              >
+                Đăng ký
+              </Button>
+            </div>
+          </div>
         </div>
 
-        <h3 style={{ color: '#ff4d4f' }}>Thanh toán</h3>
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcKD3oWVK-z3NhPCW9ldja6bLkmokAyk-JkA&s"
-          alt="zalo"
-          style={{ width: '60px', height: '60px', backgroundColor: '#fff', borderRadius: '6px' }}
-        />
-      </div>
-
-      {/* Theo dõi chúng tôi */}
-      <div style={{ marginLeft: '80px' }}>
-        <h3 style={{ color: '#ff4d4f' }}>Theo dõi chúng tôi</h3>
-        <div style={{ display: 'flex', gap: '15px', fontSize: '24px' }}>
-          <div style={{ display: 'flex' }}>
-            <a href="https://www.facebook.com/nguyen.tan.sang.117983" style={{ marginRight: '20px' }}>
-              <FacebookFilled style={{ fontSize: '5rem', color: '#4267b2', backgroundColor: '#E9EBEE' }} />
+        {/* Bottom Footer */}
+        <div
+          style={{
+            padding: '16px 0',
+            borderTop: '1px solid #333A45', // --border
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}
+        >
+          <p
+            style={{
+              fontSize: '12px',
+              color: '#8F9BB3' // --muted-foreground
+            }}
+          >
+            © 2024 Watch Shop. Tất cả quyền được bảo lưu.
+          </p>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: '12px',
+              fontSize: '12px'
+            }}
+          >
+            <a
+              href="#"
+              style={{
+                color: '#8F9BB3', // --muted-foreground
+                textDecoration: 'none',
+                transition: 'color 0.3s'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+            >
+              Điều khoản sử dụng
             </a>
-            <a href="https://www.instagram.com/_sang2003_/?hl=en" style={{ marginRight: '20px' }}>
-              <InstagramFilled style={{ color: '#E95950', fontSize: '5rem' }} />
+            <a
+              href="#"
+              style={{
+                color: '#8F9BB3', // --muted-foreground
+                textDecoration: 'none',
+                transition: 'color 0.3s'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+            >
+              Chính sách bảo mật
             </a>
-            <a href="https://www.linkedin.com/in/sang-nguyen-2511d/">
-              <LinkedinFilled style={{ color: '#0072b1 ', backgroundColor: '#fff', fontSize: '5rem' }} />
+            <a
+              href="#"
+              style={{
+                color: '#8F9BB3', // --muted-foreground
+                textDecoration: 'none',
+                transition: 'color 0.3s'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#FFC107')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#8F9BB3')}
+            >
+              Cookies
             </a>
           </div>
         </div>
       </div>
-    </div>
+    </footer>
   )
 }
 
-export default FooterComponent
+export default Footer
