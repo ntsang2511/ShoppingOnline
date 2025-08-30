@@ -33,7 +33,7 @@ function AdminUser() {
     return res
   })
   const getAllUser = async () => {
-    const res = await UserService.getAllUser()
+    const res = await UserService.getAllUser(user?.access_token)
     return res
   }
   const {

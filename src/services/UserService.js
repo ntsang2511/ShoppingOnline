@@ -43,12 +43,8 @@ export const logoutUser = async () => {
   return res.data
 }
 
-export const updateUser = async (id, data, access_token) => {
-  const res = await axiosJWT.put(`${API_ROOT}/user/update-user/${id}`, data, {
-    headers: {
-      token: `Bearer ${access_token}`
-    }
-  })
+export const updateUser = async (id, data) => {
+  const res = await axiosJWT.put(`${API_ROOT}/user/update-user/${id}`, data)
   return res.data
 }
 export const deleteUser = async (id, access_token) => {

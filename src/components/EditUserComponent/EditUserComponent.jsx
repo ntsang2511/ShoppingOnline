@@ -1,19 +1,18 @@
-import { Button, Form, Radio } from 'antd'
+import { Button, Form, Radio, Avatar, Upload, Input } from 'antd'
+import { CameraOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons'
 import Loading from '../LoadingComponent/Loading'
-import InputComponent from '../InputComponent/InputComponent'
 import { useCallback, useEffect, useState } from 'react'
 import { debounce } from 'lodash'
 import Compressor from 'compressorjs'
 import { getBase64 } from '../../utils'
-import { UploadOutlined } from '@ant-design/icons'
-import { WrapperUploadFile } from './style'
 import { useQueryClient } from '@tanstack/react-query'
 import { error, success } from '../Message/Message'
 import * as UserService from '../../services/UserService'
 import { useMutationHook } from '../../hooks/useMutationHook'
 import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
-function EditUserComponent() {
+
+const EditUserComponent = () => {
   const [isPendingUpdate, setIsPendingUpdate] = useState(false)
   const user = useSelector((state) => state?.user)
   const location = useLocation()
@@ -48,9 +47,11 @@ function EditUserComponent() {
       error()
     }
   }, [isSuccessUpdated])
+
   useEffect(() => {
     form.setFieldsValue(stateUserDetails)
   }, [form, stateUserDetails])
+
   const fetchGetUserDetails = async (rowSelected) => {
     const res = await UserService.getDetailsUser(rowSelected)
     if (res?.data) {
@@ -65,25 +66,26 @@ function EditUserComponent() {
       })
     }
     setIsPendingUpdate(false)
-    // return res
   }
+
   useEffect(() => {
     if (rowSelected) {
       setIsPendingUpdate(true)
-
       fetchGetUserDetails(rowSelected)
     }
   }, [rowSelected])
+
   const onUpdateUser = () => {
     mutationUpdate.mutate(
       { id: rowSelected, token: user?.access_token, data: { ...stateUserDetails } },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries(['users']) // Làm mới dữ liệu bảng sản phẩm
+          queryClient.invalidateQueries(['users'])
         }
       }
     )
   }
+
   const handleOnChangeDetails = useCallback(
     debounce((e) => {
       setStateUserDetails((prevState) => ({
@@ -91,154 +93,244 @@ function EditUserComponent() {
         [e.target.name]: e.target.value
       }))
     }, 500),
-    [] // Delay 500ms
+    []
   )
-  const onFinishFailedDetail = () => {
-    error()
-  }
+
   const handleOnChangeAvatarDetails = async ({ fileList }) => {
     const file = fileList[0]
-
-    new Compressor(file.originFileObj, {
-      quality: 0.6, // Điều chỉnh chất lượng ảnh, giá trị từ 0-1
-      success: async (compressedFile) => {
-        const preview = await getBase64(compressedFile)
-        setStateUserDetails({
-          ...stateUserDetails,
-          avatar: preview
-        })
-      },
-      error(err) {
-        console.error(err.message)
-      }
-    })
+    if (file) {
+      new Compressor(file.originFileObj, {
+        quality: 0.6,
+        success: async (compressedFile) => {
+          const preview = await getBase64(compressedFile)
+          setStateUserDetails({
+            ...stateUserDetails,
+            avatar: preview
+          })
+        },
+        error(err) {
+          console.error(err.message)
+        }
+      })
+    }
   }
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'center', color: 'red', fontSize: '1.7rem' }}>
-        <h1>Chỉnh sửa thông tin người dùng</h1>
-      </div>
-      <Loading isLoading={isPendingUpdate || isLoadingUpdate}>
-        <Form
-          name="basic"
-          labelCol={{
-            span: 8
-          }}
-          wrapperCol={{
-            span: 18
-          }}
-          style={{
-            maxWidth: 1200
-          }}
-          onFinish={onUpdateUser}
-          onFinishFailed={onFinishFailedDetail}
-          autoComplete="off"
-          form={form}
-        >
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your name!'
-              }
-            ]}
+    <Loading isLoading={isPendingUpdate || isLoadingUpdate}>
+      <div style={{ minHeight: '100vh', background: '#1A1A1A', padding: '24px' }}>
+        <div style={{ maxWidth: '1024px', margin: '0 auto' }}>
+          <Form
+            form={form}
+            onFinish={onUpdateUser}
+            onFinishFailed={() => error()}
+            autoComplete="off"
+            style={{ width: '100%' }}
           >
-            <InputComponent name="name" value={stateUserDetails.name} onChange={handleOnChangeDetails} />
-          </Form.Item>
-
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your email!'
-              }
-            ]}
-          >
-            <InputComponent name="email" value={stateUserDetails.email} onChange={handleOnChangeDetails} />
-          </Form.Item>
-
-          <Form.Item
-            label="Phone"
-            name="phone"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your phone!'
-              }
-            ]}
-          >
-            <InputComponent name="phone" value={stateUserDetails.phone} onChange={handleOnChangeDetails} />
-          </Form.Item>
-
-          <Form.Item label="Role" name="isAdmin">
-            <Radio.Group name="isAdmin" onChange={handleOnChangeDetails} value={stateUserDetails.isAdmin}>
-              <Radio value={true}>Admin</Radio>
-              <Radio value={false}>User</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Role" name="isShipper">
-            <Radio.Group name="isShipper" onChange={handleOnChangeDetails} value={stateUserDetails.isShipper}>
-              <Radio value={true}>Shipper</Radio>
-              <Radio value={false}>User</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item
-            label="Address"
-            name="address"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your address!'
-              }
-            ]}
-          >
-            <InputComponent name="address" value={stateUserDetails.address} onChange={handleOnChangeDetails} />
-          </Form.Item>
-          <Form.Item
-            label="Avatar"
-            name="avatar"
-            rules={[
-              {
-                required: true,
-                message: 'Please choose your avatar!'
-              }
-            ]}
-          >
-            <WrapperUploadFile onChange={handleOnChangeAvatarDetails} maxCount={1}>
-              <Button icon={<UploadOutlined />}>Select file</Button>
-            </WrapperUploadFile>
-          </Form.Item>
-          <Form.Item label="Preview avatar">
-            {stateUserDetails?.avatar && (
-              <img
-                src={stateUserDetails?.avatar}
+            <div
+              style={{
+                background: '#262626',
+                borderColor: '#404040',
+                color: '#FFCC00',
+                padding: '24px',
+                borderRadius: '8px'
+              }}
+            >
+              <div
                 style={{
-                  height: '200px',
-                  width: '200px',
-                  borderRadius: '50%',
-                  objectFit: 'cover'
+                  textAlign: 'center',
+                  color: '#FFCC00',
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  marginBottom: '32px'
                 }}
-                alt="avatar"
-              />
-            )}
-          </Form.Item>
-          <Form.Item
-            wrapperCol={{
-              offset: 13,
-              span: 16
-            }}
-          >
-            <Button style={{ padding: '20px 100px' }} type="primary" htmlType="submit">
-              Apply
-            </Button>
-          </Form.Item>
-        </Form>
-      </Loading>
-    </div>
+              >
+                Chỉnh sửa thông tin người dùng
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Avatar Section */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ position: 'relative' }}>
+                    <Avatar
+                      size={200}
+                      src={stateUserDetails.avatar}
+                      style={{
+                        border: '2px solid #FFCC00',
+                        background: '#333333',
+                        color: '#FFCC00'
+                      }}
+                      icon={<UserOutlined />}
+                    />
+                    <Form.Item name="avatar" rules={[{ required: true, message: 'Please choose your avatar!' }]}>
+                      <Upload showUploadList={false} beforeUpload={() => false} onChange={handleOnChangeAvatarDetails}>
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: -50,
+                            right: 10,
+                            fontSize: '20px',
+                            background: '#FFCC00',
+                            color: '#1A1A1A',
+                            borderRadius: '100%',
+                            padding: '12px 16px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <CameraOutlined />
+                        </div>
+                        <Button
+                          style={{
+                            position: 'absolute',
+                            background: '#333333',
+                            color: '#FFCC00',
+                            right: 30,
+                            borderColor: '#404040'
+                          }}
+                        >
+                          Chọn ảnh đại diện
+                        </Button>
+                      </Upload>
+                    </Form.Item>
+                  </div>
+                </div>
+
+                {/* Form Fields */}
+                <div style={{ display: 'grid', gap: '24px' }}>
+                  {/* Name */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ color: '#FFCC00', fontWeight: 500 }}>
+                      Tên <span style={{ color: '#F44336' }}>*</span>
+                    </label>
+                    <Form.Item
+                      name="name"
+                      rules={[{ required: true, message: 'Please input your name!' }]}
+                      style={{ margin: 0 }}
+                    >
+                      <Input
+                        name="name"
+                        value={stateUserDetails.name}
+                        onChange={handleOnChangeDetails}
+                        style={{ background: '#333333', borderColor: '#404040', color: '#FFCC00' }}
+                      />
+                    </Form.Item>
+                  </div>
+
+                  {/* Email */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ color: '#FFCC00', fontWeight: 500 }}>
+                      Email <span style={{ color: '#F44336' }}>*</span>
+                    </label>
+                    <Form.Item
+                      name="email"
+                      rules={[{ required: true, message: 'Please input your email!' }]}
+                      style={{ margin: 0 }}
+                    >
+                      <Input
+                        type="email"
+                        name="email"
+                        value={stateUserDetails.email}
+                        onChange={handleOnChangeDetails}
+                        style={{ background: '#333333', borderColor: '#404040', color: '#FFCC00' }}
+                      />
+                    </Form.Item>
+                  </div>
+
+                  {/* Phone */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ color: '#FFCC00', fontWeight: 500 }}>
+                      Số điện thoại <span style={{ color: '#F44336' }}>*</span>
+                    </label>
+                    <Form.Item
+                      name="phone"
+                      rules={[{ required: true, message: 'Please input your phone!' }]}
+                      style={{ margin: 0 }}
+                    >
+                      <Input
+                        name="phone"
+                        value={stateUserDetails.phone}
+                        onChange={handleOnChangeDetails}
+                        style={{ background: '#333333', borderColor: '#404040', color: '#FFCC00' }}
+                      />
+                    </Form.Item>
+                  </div>
+
+                  {/* Role: isAdmin */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <label style={{ color: '#FFCC00', fontWeight: 500 }}>Vai trò (Admin)</label>
+                    <Form.Item name="isAdmin" style={{ margin: 0 }}>
+                      <Radio.Group
+                        name="isAdmin"
+                        onChange={handleOnChangeDetails}
+                        value={stateUserDetails.isAdmin}
+                        style={{ display: 'flex', gap: '24px' }}
+                      >
+                        <Radio value={true} style={{ color: '#FFCC00' }}>
+                          Admin
+                        </Radio>
+                        <Radio value={false} style={{ color: '#FFCC00' }}>
+                          User
+                        </Radio>
+                      </Radio.Group>
+                    </Form.Item>
+                  </div>
+
+                  {/* Role: isShipper */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <label style={{ color: '#FFCC00', fontWeight: 500 }}>Vai trò (Shipper)</label>
+                    <Form.Item name="isShipper" style={{ margin: 0 }}>
+                      <Radio.Group
+                        name="isShipper"
+                        onChange={handleOnChangeDetails}
+                        value={stateUserDetails.isShipper}
+                        style={{ display: 'flex', gap: '24px' }}
+                      >
+                        <Radio value={true} style={{ color: '#FFCC00' }}>
+                          Shipper
+                        </Radio>
+                        <Radio value={false} style={{ color: '#FFCC00' }}>
+                          User
+                        </Radio>
+                      </Radio.Group>
+                    </Form.Item>
+                  </div>
+
+                  {/* Address */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ color: '#FFCC00', fontWeight: 500 }}>
+                      Địa chỉ <span style={{ color: '#F44336' }}>*</span>
+                    </label>
+                    <Form.Item
+                      name="address"
+                      rules={[{ required: true, message: 'Please input your address!' }]}
+                      style={{ margin: 0 }}
+                    >
+                      <Input
+                        name="address"
+                        value={stateUserDetails.address}
+                        onChange={handleOnChangeDetails}
+                        style={{ background: '#333333', borderColor: '#404040', color: '#FFCC00' }}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div style={{ paddingTop: '24px' }}>
+                  <Button
+                    type="primary"
+                    block
+                    htmlType="submit"
+                    style={{ background: '#FFCC00', color: '#1A1A1A', fontWeight: 500, padding: '24px' }}
+                  >
+                    <SaveOutlined />
+                    Lưu thay đổi
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Form>
+        </div>
+      </div>
+    </Loading>
   )
 }
 
